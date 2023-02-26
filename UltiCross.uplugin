@@ -1,0 +1,23 @@
+{
+  "FileVersion" : 3,
+
+  "FriendlyName" : "Ultimate Crosshairs",
+  "Version" : 1,
+  "VersionName" : "1.0",
+  "CreatedBy" : "Aldehir Rojas",
+  "CreatedByURL" : "http://alde.dev",
+  "EngineVersion" : "4.15.0",
+  "Description" : "Customizable Crosshairs",
+  "Category" : "UnrealTournament.Mod",
+  "EnabledByDefault" : true,
+  "CanContainContent" : false,
+
+  "Modules" :
+  [
+    {
+      "Name" : "UltiCross",
+      "Type" : "Runtime",
+      "WhitelistPlatforms" : [ "Win64" ]
+    }
+  ]
+}
