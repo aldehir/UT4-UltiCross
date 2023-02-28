@@ -17,7 +17,4 @@ public:
   int TextureSlot;
 
   void PostInitProperties() override;
-
-private:
-  void BuildTexture();
 };
