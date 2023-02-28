@@ -1,24 +1,11 @@
 #include "UltiCrossPCH.h"
-#include "TestCrosshair.h"
+#include "Fixtures.h"
 
 #include "cairo/cairo.h"
 
-UTestCrosshair::UTestCrosshair(class FObjectInitializer const & PCIP) : Super(PCIP)
+UTexture2D *CreateExampleCrosshairTexture()
 {
-}
-
-void UTestCrosshair::PostInitProperties()
-{
-  Super::PostInitProperties();
-  BuildTexture();
-}
-
-void UTestCrosshair::BuildTexture()
-{
-  UE_LOG(LogUltiCross, Log, TEXT("Building Image for TextureSlot %d"), TextureSlot);
-
   UTexture2D* Tex = UTexture2D::CreateTransient(32, 32);
-
   FTexture2DMipMap* MipMap = &Tex->PlatformData->Mips[0];
   FByteBulkData* ImageData = &MipMap->BulkData;
 
@@ -53,8 +40,12 @@ void UTestCrosshair::BuildTexture()
 
   ImageData->Unlock();
   Tex->UpdateResource();
+  return Tex;
+}
 
-  CrosshairIcon.Texture = Tex;
-  CrosshairIcon.UL = 32.0f;
-  CrosshairIcon.VL = 32.0f;
+void CreateExampleCrosshairList(TArray<TSharedPtr<FString>>& Array)
+{
+  Array.Add(TSharedPtr<FString>(new FString("Crosshair #1")));
+  Array.Add(TSharedPtr<FString>(new FString("Crosshair #2")));
+  Array.Add(TSharedPtr<FString>(new FString("Crosshair #3")));
 }

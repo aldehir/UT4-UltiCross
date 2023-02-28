@@ -11,10 +11,19 @@ public class UltiCross : ModuleRules
           "Core",
           "CoreUObject",
           "Engine",
+          "InputCore",
+          "UnrealEd",
           "UnrealTournament",
           "AssetRegistry",
+          "AppFramework",
         });
 
-    PrivateDependencyModuleNames.Add("UltiCrossCairo");
+    PrivateDependencyModuleNames.AddRange(
+        new string[]
+        {
+          "Slate",
+          "SlateCore",
+          "UltiCrossCairo",
+        });
   }
 }
