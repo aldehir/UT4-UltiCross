@@ -2,100 +2,56 @@
 #include "SUltiCrosshairViewModel.h"
 #include "UltiCrosshair.h"
 
-static float NormalizeValue(float Value, float Min, float Max)
+void FSliderDelegate::Set(float Value)
 {
+  Value = Min + ((Max - Min) * Value);
+  Value = FMath::FloorToInt(Value * (1.0f / Resolution)) * Resolution;
+
+  (Model->*Setter)(Value);
+}
+
+float FSliderDelegate::Get() const
+{
+  float Value = (Model->*Getter)();
   return (Value - Min) / (Max - Min);
 }
 
-static float ScaleValue(float Value, float Min, float Max)
+FText FSliderDelegate::Text() const
 {
-  return Min + ((Max - Min) * Value);
+  float Value = (Model->*Getter)();
+  return FText::AsNumber(Value);
 }
 
-SUltiCrosshairViewModel::SUltiCrosshairViewModel(UUltiCrosshair *Crosshair) : Model(Crosshair)
+#define ASSIGN_SLIDER_DELEGATE(Attr) \
+  do { \
+    Attr##Delegate = MakeShareable( \
+      new FSliderDelegate( \
+        &Proxy, \
+        &FUltiCrosshairProxy::Get##Attr, \
+        &FUltiCrosshairProxy::Set##Attr, \
+        UltiCrosshairConstraint::Attr##Min, \
+        UltiCrosshairConstraint::Attr##Max, \
+        UltiCrosshairConstraint::Attr##Resolution \
+      ) \
+    ); \
+  } while (0)
+
+SUltiCrosshairViewModel::SUltiCrosshairViewModel(UUltiCrosshair *Crosshair)
 {
+  Proxy.SetCrosshair(Crosshair);
   Brush = new FSlateBrush();
+
+  ASSIGN_SLIDER_DELEGATE(Thickness);
+  ASSIGN_SLIDER_DELEGATE(Gap);
+  ASSIGN_SLIDER_DELEGATE(Length);
 }
 
-void SUltiCrosshairViewModel::SetModel(UUltiCrosshair* Crosshair) {
-  Model = Crosshair;
-  Brush->SetResourceObject(Model->GetTexture());
+void SUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* Crosshair) {
+  Proxy.SetCrosshair(Crosshair);
+  Brush->SetResourceObject(Crosshair->GetTexture());
 }
 
 FText SUltiCrosshairViewModel::GetCrosshairName() const
 {
-  if (Model == nullptr)
-  {
-    return FText();
-  }
-
-  return Model->CrosshairName;
-}
-
-#define HANDLE_SLIDER_CHANGE(Attr, Value, Min, Max) \
-  do { \
-    if (Model == nullptr) return; \
-    float NewValue = FMath::RoundToInt(ScaleValue((Value), (Min), (Max))); \
-    if (Model->Attr != NewValue) \
-    { \
-      Model->Attr = NewValue; \
-      Model->UpdateTexture(); \
-    } \
-  } while (0)
-
-#define HANDLE_SLIDER_GET_VALUE(Attr, Min, Max) \
-  do { \
-    if (Model == nullptr) return 0.0f; \
-    return NormalizeValue(Model->Attr, (Min), (Max)); \
-  } while (0)
-
-#define HANDLE_SLIDER_GET_VALUE_AS_TEXT(Attr) \
-  do { \
-    if (Model == nullptr) return FText(); \
-    return FText::AsNumber(Model->Attr); \
-  } while (0)
-
-void SUltiCrosshairViewModel::OnThicknessSliderChange(float Value)
-{
-  HANDLE_SLIDER_CHANGE(Thickness, Value, ULTICROSS_THICKNESS_MIN, ULTICROSS_THICKNESS_MAX);
-}
-
-float SUltiCrosshairViewModel::GetThicknessForSlider() const
-{
-  HANDLE_SLIDER_GET_VALUE(Thickness, ULTICROSS_THICKNESS_MIN, ULTICROSS_THICKNESS_MAX);
-}
-
-FText SUltiCrosshairViewModel::GetThicknessAsText() const
-{
-  HANDLE_SLIDER_GET_VALUE_AS_TEXT(Thickness);
-}
-
-void SUltiCrosshairViewModel::OnGapSliderChange(float Value)
-{
-  HANDLE_SLIDER_CHANGE(Gap, Value, 0.0f, 10.0f);
-}
-
-float SUltiCrosshairViewModel::GetGapForSlider() const
-{
-  HANDLE_SLIDER_GET_VALUE(Gap, 0.0f, 10.0f);
-}
-
-FText SUltiCrosshairViewModel::GetGapAsText() const
-{
-  HANDLE_SLIDER_GET_VALUE_AS_TEXT(Gap);
-}
-
-void SUltiCrosshairViewModel::OnLengthSliderChange(float Value)
-{
-  HANDLE_SLIDER_CHANGE(Length, Value, 0.0f, 30.0f);
-}
-
-float SUltiCrosshairViewModel::GetLengthForSlider() const
-{
-  HANDLE_SLIDER_GET_VALUE(Length, 0.0f, 30.0f);
-}
-
-FText SUltiCrosshairViewModel::GetLengthAsText() const
-{
-  HANDLE_SLIDER_GET_VALUE_AS_TEXT(Length);
+  return Proxy.GetCrosshairName();
 }

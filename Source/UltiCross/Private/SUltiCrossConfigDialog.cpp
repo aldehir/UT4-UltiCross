@@ -117,23 +117,9 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
           SNew(SVerticalBox)
           
           // Placeholders for now
-          +AddSlider(
-            FText::FromString(TEXT("Thickness")),
-            &SUltiCrosshairViewModel::GetThicknessAsText,
-            &SUltiCrosshairViewModel::GetThicknessForSlider,
-            &SUltiCrosshairViewModel::OnThicknessSliderChange)
-
-          +AddSlider(
-            FText::FromString(TEXT("Length")),
-            &SUltiCrosshairViewModel::GetLengthAsText,
-            &SUltiCrosshairViewModel::GetLengthForSlider,
-            &SUltiCrosshairViewModel::OnLengthSliderChange)
-
-          +AddSlider(
-            FText::FromString(TEXT("Gap")),
-            &SUltiCrosshairViewModel::GetGapAsText,
-            &SUltiCrosshairViewModel::GetGapForSlider,
-            &SUltiCrosshairViewModel::OnGapSliderChange)
+          +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->ThicknessDelegate)
+          +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->LengthDelegate)
+          +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GapDelegate)
 
           // +SVerticalBox::Slot()
           // .AutoHeight()
@@ -151,7 +137,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshairSelection()
 {
   return SNew(SComboBox<UUltiCrosshair*>)
-    .InitiallySelectedItem(CrosshairViewModel->GetModel())
+    .InitiallySelectedItem(CrosshairViewModel->GetCrosshair())
     .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
     .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
     .OptionsSource(&Crosshairs)
@@ -168,7 +154,7 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
 
 void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType)
 {
-  CrosshairViewModel->SetModel(NewSelection);
+  CrosshairViewModel->SetCrosshair(NewSelection);
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
@@ -202,16 +188,11 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
 
   if (Crosshairs.Num() > 0)
   {
-    CrosshairViewModel->SetModel(Crosshairs[0]);
+    CrosshairViewModel->SetCrosshair(Crosshairs[0]);
   }
 }
 
-SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
-  FText Caption,
-  FText (SUltiCrosshairViewModel::*GetText)() const,
-  float (SUltiCrosshairViewModel::*GetFloat)() const,
-  void (SUltiCrosshairViewModel::*SetFloat)(float)
-)
+SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr<FSliderDelegate> Delegate)
 {
   return SVerticalBox::Slot()
   .HAlign(HAlign_Fill)
@@ -238,7 +219,7 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
       .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
       .ForegroundColor(FLinearColor::Black)
       .MinDesiredWidth(48.0f)
-      .Text(CrosshairViewModel.ToSharedRef(), GetText)
+      .Text(Delegate.ToSharedRef(), &FSliderDelegate::Text)
     ]
 
     // Slider
@@ -248,8 +229,8 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
       SNew(SSlider)
       .IndentHandle(false)
       .Style(SUTStyle::Get(), "UT.Slider")
-      .Value(CrosshairViewModel.ToSharedRef(), GetFloat)
-      .OnValueChanged(CrosshairViewModel.ToSharedRef(), SetFloat)
+      .Value(Delegate.ToSharedRef(), &FSliderDelegate::Get)
+      .OnValueChanged(Delegate.ToSharedRef(), &FSliderDelegate::Set)
     ]
   ];
 }

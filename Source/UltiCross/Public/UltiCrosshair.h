@@ -8,6 +8,22 @@
 #define ULTICROSS_THICKNESS_MAX 11.0f
 #define ULTICROSS_THICKNESS_DELTA (ULTICROSS_THICKNESS_MAX - ULTICROSS_THICKNESS_MIN)
 
+/** Constraints */
+namespace UltiCrosshairConstraint
+{
+  extern const float ThicknessMin;
+  extern const float ThicknessMax;
+  extern const float ThicknessResolution;
+
+  extern const float GapMin;
+  extern const float GapMax;
+  extern const float GapResolution;
+
+  extern const float LengthMin;
+  extern const float LengthMax;
+  extern const float LengthResolution;
+};
+
 UCLASS(Config = Game, ConfigDoNotCheckDefaults)
 class ULTICROSS_API UUltiCrosshair : public UUTCrosshair
 {

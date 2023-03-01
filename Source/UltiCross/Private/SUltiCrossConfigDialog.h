@@ -39,12 +39,7 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
 
-  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
-    FText Caption,
-    FText (SUltiCrosshairViewModel::*GetText)() const,
-    float (SUltiCrosshairViewModel::*GetFloat)() const,
-    void (SUltiCrosshairViewModel::*SetFloat)(float)
-  );
+  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr<FSliderDelegate> Delegate);
 
 public:
   virtual bool bRemainOPenThroughTravel()
