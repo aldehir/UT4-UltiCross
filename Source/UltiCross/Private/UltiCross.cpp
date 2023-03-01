@@ -1,6 +1,7 @@
 #include "UltiCrossPCH.h"
 #include "Editor.h"
 #include "TestCrosshair.h"
+#include "UltiCrosshair.h"
 #include "SUltiCrossConfigDialog.h"
 
 #include "AssetRegistryModule.h"
@@ -48,21 +49,45 @@ FUltiCrossExecHandler::FUltiCrossExecHandler()
 
 bool FUltiCrossExecHandler::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar)
 {
-  if (FParse::Command(&Cmd, TEXT("ULTICROSS"))) {
-    Ar.Log(TEXT("UltiCross Activated"));
-
-    UUTLocalPlayer* Player = Cast<UUTLocalPlayer>(GEngine->GetLocalPlayerFromControllerId(InWorld, 0));
-    if (Player)
+  if (FParse::Command(&Cmd, TEXT("ULTICROSS")))
+  {
+    if (FParse::Command(&Cmd, TEXT("LIST")))
     {
-      UE_LOG(LogUltiCross, Log, TEXT("Found Local Player @ %p: %s"), Player, *Player->GetNickname());
+      AUTPlayerController* PlayerController = Cast<AUTPlayerController>(GEngine->GetFirstLocalPlayerController(InWorld));
+      AUTHUD* HUD = PlayerController->MyUTHUD;
+
+      Ar.Log(TEXT("UltiCrosshairs:"));
+
+      for (const TPair<FName, UUTCrosshair*>& Pair : HUD->Crosshairs)
+      {
+        UUltiCrosshair* UltiCrosshair = Cast<UUltiCrosshair>(Pair.Value);
+        if (UltiCrosshair)
+        {
+          Ar.Logf(TEXT("  %s: Name=%s Thickness=%f Length=%f Gap=%f"),
+            *(UltiCrosshair->CrosshairTag.ToString()), *(UltiCrosshair->CrosshairName.ToString()),
+            UltiCrosshair->Thickness, UltiCrosshair->Length, UltiCrosshair->Gap);
+        }
+      }
+
+      return true;
     }
+    else
+    {
+      Ar.Log(TEXT("UltiCross Activated"));
 
-    TSharedRef<class SUTDialogBase> Dialog = SNew(SUltiCrossConfigDialog)
-      .PlayerOwner(Player);
+      UUTLocalPlayer* Player = Cast<UUTLocalPlayer>(GEngine->GetLocalPlayerFromControllerId(InWorld, 0));
+      if (Player)
+      {
+        UE_LOG(LogUltiCross, Log, TEXT("Found Local Player @ %p: %s"), Player, *Player->GetNickname());
+      }
 
-    Player->OpenDialog(Dialog);
+      TSharedRef<class SUTDialogBase> Dialog = SNew(SUltiCrossConfigDialog)
+        .PlayerOwner(Player);
 
-    return true;
+      Player->OpenDialog(Dialog);
+
+      return true;
+    }
   }
 
   return false;

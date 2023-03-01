@@ -110,10 +110,15 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
             SNew(SBorder)
             .HAlign(HAlign_Fill)
             .VAlign(VAlign_Fill)
-            .Padding(FMargin(112))
+            .Padding(FMargin(96))
             [
-              SNew(SImage)
-              .Image(ExampleCrosshair)
+              SNew(SBox)
+              .WidthOverride(64)
+              .HeightOverride(64)
+              [
+                SNew(SImage)
+                .Image(ExampleCrosshair)
+              ]
             ]
           ]
         ]
