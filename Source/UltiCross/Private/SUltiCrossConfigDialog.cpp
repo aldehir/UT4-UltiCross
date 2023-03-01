@@ -5,6 +5,8 @@
 #include "Stubs/SUTStyle.h"
 #include "Stubs/SUWindowsStyle.h"
 
+#include "UltiCrosshair.h"
+
 #include "Fixtures.h"
 
 #if !UE_SERVER
@@ -52,6 +54,8 @@ static SVerticalBox::FSlot& AddSlider(FText Caption) {
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
+  HUD = InArgs._HUD;
+
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
     .PlayerOwner(InArgs._PlayerOwner)
     .DialogTitle(InArgs._DialogTitle)
@@ -64,7 +68,9 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
     .ButtonMask(InArgs._ButtonMask)
     .OnDialogResult(InArgs._OnDialogResult)
   );
-  
+
+  GatherCrosshairs();
+
   ExampleCrosshair = new FSlateBrush();
   ExampleCrosshair->SetResourceObject(CreateExampleCrosshairTexture());
   
@@ -129,19 +135,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
         .VAlign(VAlign_Fill)
         .AutoHeight()
         [
-          SNew(SComboBox<TSharedPtr<FString>>)
-          .InitiallySelectedItem(ExampleCrosshairList[0])
-          .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
-          .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
-          .OptionsSource(&ExampleCrosshairList)
-          .OnGenerateWidget(this, &SUTDialogBase::GenerateStringListWidget)
-          .Content()
-          [
-            SAssignNew(SelectedCrosshair, STextBlock)
-            .Text(FText::FromString(*ExampleCrosshairList[0].Get()))
-            .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
-            .ColorAndOpacity(FLinearColor::Black)
-          ]
+          ConstructCrosshairSelection()
         ]
       ]
 
@@ -214,6 +208,74 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
         ]
       ]
     ];
+  }
+}
+
+TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshairSelection()
+{
+  return SNew(SComboBox<UUltiCrosshair*>)
+    .InitiallySelectedItem(Selected)
+    .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
+    .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
+    .OptionsSource(&Crosshairs)
+    .OnGenerateWidget(this, &SUltiCrossConfigDialog::GenerateCrosshairListWidget)
+    .OnSelectionChanged(this, &SUltiCrossConfigDialog::OnCrosshairChanged)
+    .Content()
+    [
+      SAssignNew(SelectedTextBlock, STextBlock)
+      .Text_Raw(this, &SUltiCrossConfigDialog::GetSelectedCrosshairName)
+      .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
+      .ColorAndOpacity(FLinearColor::Black)
+    ];
+}
+
+void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType)
+{
+  Selected = NewSelection;
+}
+
+FText SUltiCrossConfigDialog::GetSelectedCrosshairName() const
+{
+  if (Selected)
+  {
+    return Selected->CrosshairName;
+  }
+
+  return FText();
+}
+
+TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
+{
+	return SNew(SBox)
+		.Padding(5)
+		[
+			SNew(STextBlock)
+			.Text(InItem->CrosshairName)
+			.TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
+		];
+}
+
+void SUltiCrossConfigDialog::GatherCrosshairs()
+{
+  if (HUD == nullptr)
+  {
+    return;
+  }
+
+  for (const TPair<FName, UUTCrosshair*>& Pair : HUD->Crosshairs)
+  {
+    UUltiCrosshair *UltiCrosshair = Cast<UUltiCrosshair>(Pair.Value);
+    if (UltiCrosshair == nullptr)
+    {
+      continue;
+    }
+
+    Crosshairs.Add(UltiCrosshair);
+  }
+
+  if (Crosshairs.Num() > 0)
+  {
+    Selected = Crosshairs[0];
   }
 }
 

@@ -5,6 +5,8 @@
 
 #if !UE_SERVER
 
+class UUltiCrosshair;
+
 class SUltiCrossConfigDialog : public SUTDialogBase
 {
   SLATE_BEGIN_ARGS(SUltiCrossConfigDialog)
@@ -17,6 +19,7 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   , _ButtonMask(UTDIALOG_BUTTON_OK)
   {}
   SLATE_ARGUMENT(TWeakObjectPtr<class UUTLocalPlayer>, PlayerOwner)
+  SLATE_ARGUMENT(TWeakObjectPtr<class AUTHUD>, HUD)
   SLATE_ARGUMENT(FText, DialogTitle)
   SLATE_ARGUMENT(FVector2D, DialogSize)
   SLATE_ARGUMENT(bool, bDialogSizeIsRelative)
@@ -29,6 +32,13 @@ class SUltiCrossConfigDialog : public SUTDialogBase
 
   void Construct(const FArguments& InArgs);
 
+  void GatherCrosshairs();
+
+  TSharedRef<SComboBox<UUltiCrosshair*>> ConstructCrosshairSelection();
+  TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
+  void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
+  FText GetSelectedCrosshairName() const;
+
 public:
   virtual bool bRemainOPenThroughTravel()
   {
@@ -36,9 +46,14 @@ public:
   }
 
 private:
+  TWeakObjectPtr<class AUTHUD> HUD;
+
+  TArray<UUltiCrosshair*> Crosshairs;
+  TSharedPtr<STextBlock> SelectedTextBlock;
+  UUltiCrosshair* Selected;
+
   FSlateBrush* ExampleCrosshair;
   TArray<TSharedPtr<FString>> ExampleCrosshairList;
-  TSharedPtr<STextBlock> SelectedCrosshair;
 
   TArray<TSharedPtr<FString>> ShapeList;
   TSharedPtr<STextBlock> SelectedShape;
