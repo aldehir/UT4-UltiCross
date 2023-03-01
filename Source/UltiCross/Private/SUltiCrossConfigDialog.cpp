@@ -11,46 +11,6 @@
 
 #if !UE_SERVER
 
-static SVerticalBox::FSlot& AddSlider(FText Caption) {
-  return SVerticalBox::Slot()
-  .HAlign(HAlign_Fill)
-  .AutoHeight()
-  .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
-  [
-    SNew(SHorizontalBox)
-
-    // Caption
-    +SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-      SNew(STextBlock)
-      .MinDesiredWidth(200)
-      .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
-      .Text(Caption)
-    ]
-
-    // Edit Box
-    +SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-      SNew(SEditableTextBox)
-      .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
-      .ForegroundColor(FLinearColor::Black)
-      .MinDesiredWidth(48.0f)
-      .Text(FText::FromString(TEXT("1")))
-    ]
-
-    // Slider
-    +SHorizontalBox::Slot()
-    .FillWidth(1)
-    [
-      SNew(SSlider)
-      .IndentHandle(false)
-      .Style(SUTStyle::Get(), "UT.Slider")
-      .Value(1)
-    ]
-  ];
-}
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
@@ -125,7 +85,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
               .HeightOverride(64)
               [
                 SNew(SImage)
-                .Image(ExampleCrosshair)
+                .Image(CrosshairViewModel->GetBrush())
               ]
             ]
           ]
@@ -156,57 +116,32 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
         [
           SNew(SVerticalBox)
           
-          // Shape
-          +SVerticalBox::Slot()
-          .HAlign(HAlign_Fill)
-          .AutoHeight()
-          .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
-          [
-            SNew(SHorizontalBox)
-            +SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-              SNew(STextBlock)
-              .MinDesiredWidth(200)
-              .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
-              .Text(FText::FromString(TEXT("Type")))
-            ]
-
-            +SHorizontalBox::Slot()
-            .FillWidth(1)
-            [
-              SNew(SComboBox<TSharedPtr<FString>>)
-              .InitiallySelectedItem(ShapeList[0])
-              .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
-              .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
-              .OptionsSource(&ShapeList)
-              .OnGenerateWidget(this, &SUTDialogBase::GenerateStringListWidget)
-              .Content()
-              [
-                SAssignNew(SelectedShape, STextBlock)
-                .Text(FText::FromString(*ShapeList[0].Get()))
-                .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
-                .ColorAndOpacity(FLinearColor::Black)
-              ]
-            ]
-          ]
-          
           // Placeholders for now
-          +AddSlider(FText::FromString(TEXT("Thickness")))
-          +AddSlider(FText::FromString(TEXT("Crosshair Length")))
-          +AddSlider(FText::FromString(TEXT("Center Gap")))
-          +AddSlider(FText::FromString(TEXT("Opacity")))
-          +AddSlider(FText::FromString(TEXT("Outline Opacity")))
-          +AddSlider(FText::FromString(TEXT("Dot Size")))
-          +AddSlider(FText::FromString(TEXT("Dot Opacity")))
+          +AddSlider(
+            FText::FromString(TEXT("Thickness")),
+            &SUltiCrosshairViewModel::GetThicknessAsText,
+            &SUltiCrosshairViewModel::GetThicknessForSlider,
+            &SUltiCrosshairViewModel::OnThicknessSliderChange)
 
-          +SVerticalBox::Slot()
-          .AutoHeight()
-          [
-            SNew(SColorPicker)
-            .DisplayInlineVersion(true)
-            .UseAlpha(true)
-          ]
+          +AddSlider(
+            FText::FromString(TEXT("Length")),
+            &SUltiCrosshairViewModel::GetLengthAsText,
+            &SUltiCrosshairViewModel::GetLengthForSlider,
+            &SUltiCrosshairViewModel::OnLengthSliderChange)
+
+          +AddSlider(
+            FText::FromString(TEXT("Gap")),
+            &SUltiCrosshairViewModel::GetGapAsText,
+            &SUltiCrosshairViewModel::GetGapForSlider,
+            &SUltiCrosshairViewModel::OnGapSliderChange)
+
+          // +SVerticalBox::Slot()
+          // .AutoHeight()
+          // [
+          //   SNew(SColorPicker)
+          //   .DisplayInlineVersion(true)
+          //   .UseAlpha(true)
+          // ]
         ]
       ]
     ];
@@ -269,6 +204,54 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
   {
     CrosshairViewModel->SetModel(Crosshairs[0]);
   }
+}
+
+SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
+  FText Caption,
+  FText (SUltiCrosshairViewModel::*GetText)() const,
+  float (SUltiCrosshairViewModel::*GetFloat)() const,
+  void (SUltiCrosshairViewModel::*SetFloat)(float)
+)
+{
+  return SVerticalBox::Slot()
+  .HAlign(HAlign_Fill)
+  .AutoHeight()
+  .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
+  [
+    SNew(SHorizontalBox)
+
+    // Caption
+    +SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+      SNew(STextBlock)
+      .MinDesiredWidth(200)
+      .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+      .Text(Caption)
+    ]
+
+    // Edit Box
+    +SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+      SNew(SEditableTextBox)
+      .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
+      .ForegroundColor(FLinearColor::Black)
+      .MinDesiredWidth(48.0f)
+      .Text(CrosshairViewModel.ToSharedRef(), GetText)
+    ]
+
+    // Slider
+    +SHorizontalBox::Slot()
+    .FillWidth(1)
+    [
+      SNew(SSlider)
+      .IndentHandle(false)
+      .Style(SUTStyle::Get(), "UT.Slider")
+      .Value(CrosshairViewModel.ToSharedRef(), GetFloat)
+      .OnValueChanged(CrosshairViewModel.ToSharedRef(), SetFloat)
+    ]
+  ];
 }
 
 #endif

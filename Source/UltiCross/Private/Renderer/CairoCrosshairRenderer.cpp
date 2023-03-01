@@ -139,7 +139,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FRenderContext *Ctx, float Thickn
 
   // Make sure the desired value are not out of bounds
   Thickness = FMath::Clamp(Thickness, 1.0f, 10.0f);
-  Length = FMath::Clamp(Length, 1.0f, 10.0f);
+  Length = FMath::Clamp(Length, 1.0f, 30.0f);
   Gap = FMath::Clamp(Gap, 0.0f, 10.0f);
 
   FVector2D Center(RC->SizeX() / 2.0f, RC->SizeY() / 2.0f);

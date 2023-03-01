@@ -39,6 +39,13 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
 
+  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(
+    FText Caption,
+    FText (SUltiCrosshairViewModel::*GetText)() const,
+    float (SUltiCrosshairViewModel::*GetFloat)() const,
+    void (SUltiCrosshairViewModel::*SetFloat)(float)
+  );
+
 public:
   virtual bool bRemainOPenThroughTravel()
   {
@@ -50,7 +57,6 @@ private:
 
   TArray<UUltiCrosshair*> Crosshairs;
   TSharedPtr<SUltiCrosshairViewModel> CrosshairViewModel;
-  TSharedPtr<STextBlock> CrosshairTextBlock;
 
   FSlateBrush* ExampleCrosshair;
   TArray<TSharedPtr<FString>> ExampleCrosshairList;

@@ -1,6 +1,7 @@
 #include "UltiCrossPCH.h"
 #include "UltiCrosshair.h"
-#include "Fixtures.h"
+
+#include "Renderer/CairoCrosshairRenderer.h"
 
 UUltiCrosshair::UUltiCrosshair(class FObjectInitializer const & PCIP) : Super(PCIP)
 {
@@ -17,7 +18,21 @@ void UUltiCrosshair::PostInitProperties()
   UE_LOG(LogUltiCross, Log, TEXT("Crosshair Loaded: Name=%s Type=%s Thickness=%f Gap=%f Length=%f"),
     *CrosshairName.ToString(), *Type.ToString(), Thickness, Gap, Length);
 
-  CrosshairIcon.Texture = CreateExampleCrosshairTexture();
-  CrosshairIcon.UL = 64.0f;
-  CrosshairIcon.VL = 64.0f;
+  Texture = UTexture2D::CreateTransient(64, 64);
+  CrosshairIcon.Texture = Texture;
+  CrosshairIcon.UL = Texture->GetSizeX();
+  CrosshairIcon.VL = Texture->GetSizeY();
+
+  UpdateTexture();
+}
+
+void UUltiCrosshair::UpdateTexture()
+{
+  FCairoCrosshairRenderer Renderer;
+  FCairoRenderContext RenderContext(Texture);
+
+  RenderContext.Begin();
+  Renderer.Clear(&RenderContext);
+  Renderer.RenderCrosshairs(&RenderContext, Thickness, Length, Gap, FLinearColor::White, FLinearColor::Black);
+  RenderContext.End();
 }
