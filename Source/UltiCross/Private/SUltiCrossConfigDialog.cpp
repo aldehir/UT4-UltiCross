@@ -54,6 +54,8 @@ static SVerticalBox::FSlot& AddSlider(FText Caption) {
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
+  CrosshairViewModel = TSharedPtr<SUltiCrossConfigViewModel>(new SUltiCrossConfigViewModel(nullptr));
+
   HUD = InArgs._HUD;
 
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
@@ -214,7 +216,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshairSelection()
 {
   return SNew(SComboBox<UUltiCrosshair*>)
-    .InitiallySelectedItem(Selected)
+    .InitiallySelectedItem(CrosshairViewModel->GetModel())
     .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
     .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
     .OptionsSource(&Crosshairs)
@@ -222,8 +224,8 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
     .OnSelectionChanged(this, &SUltiCrossConfigDialog::OnCrosshairChanged)
     .Content()
     [
-      SAssignNew(SelectedTextBlock, STextBlock)
-      .Text_Raw(this, &SUltiCrossConfigDialog::GetSelectedCrosshairName)
+      SNew(STextBlock)
+      .Text(CrosshairViewModel.ToSharedRef(), &SUltiCrossConfigViewModel::GetCrosshairName)
       .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
       .ColorAndOpacity(FLinearColor::Black)
     ];
@@ -231,17 +233,7 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
 
 void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType)
 {
-  Selected = NewSelection;
-}
-
-FText SUltiCrossConfigDialog::GetSelectedCrosshairName() const
-{
-  if (Selected)
-  {
-    return Selected->CrosshairName;
-  }
-
-  return FText();
+  CrosshairViewModel->SetModel(NewSelection);
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
@@ -275,7 +267,7 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
 
   if (Crosshairs.Num() > 0)
   {
-    Selected = Crosshairs[0];
+    CrosshairViewModel->SetModel(Crosshairs[0]);
   }
 }
 

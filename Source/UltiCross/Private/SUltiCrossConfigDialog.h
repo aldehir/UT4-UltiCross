@@ -2,6 +2,7 @@
 
 #include "UnrealTournament.h"
 #include "SlateBasics.h"
+#include "SUltiCrossConfigViewModel.h"
 
 #if !UE_SERVER
 
@@ -37,7 +38,6 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   TSharedRef<SComboBox<UUltiCrosshair*>> ConstructCrosshairSelection();
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
-  FText GetSelectedCrosshairName() const;
 
 public:
   virtual bool bRemainOPenThroughTravel()
@@ -49,8 +49,8 @@ private:
   TWeakObjectPtr<class AUTHUD> HUD;
 
   TArray<UUltiCrosshair*> Crosshairs;
-  TSharedPtr<STextBlock> SelectedTextBlock;
-  UUltiCrosshair* Selected;
+  TSharedPtr<SUltiCrossConfigViewModel> CrosshairViewModel;
+  TSharedPtr<STextBlock> CrosshairTextBlock;
 
   FSlateBrush* ExampleCrosshair;
   TArray<TSharedPtr<FString>> ExampleCrosshairList;
