@@ -7,10 +7,10 @@ class UUltiCrosshair;
 /**
  * Crosshair Configuration ViewModel.
  */
-class SUltiCrossConfigViewModel
+class SUltiCrosshairViewModel
 {
 public:
-  SUltiCrossConfigViewModel(UUltiCrosshair *Crosshair);
+  SUltiCrosshairViewModel(UUltiCrosshair *Crosshair);
 
   inline void SetModel(UUltiCrosshair* Crosshair) { Model = Crosshair; }
   inline UUltiCrosshair* GetModel() const { return Model; }

@@ -2,7 +2,7 @@
 
 #include "UnrealTournament.h"
 #include "SlateBasics.h"
-#include "SUltiCrossConfigViewModel.h"
+#include "SUltiCrosshairViewModel.h"
 
 #if !UE_SERVER
 
@@ -49,7 +49,7 @@ private:
   TWeakObjectPtr<class AUTHUD> HUD;
 
   TArray<UUltiCrosshair*> Crosshairs;
-  TSharedPtr<SUltiCrossConfigViewModel> CrosshairViewModel;
+  TSharedPtr<SUltiCrosshairViewModel> CrosshairViewModel;
   TSharedPtr<STextBlock> CrosshairTextBlock;
 
   FSlateBrush* ExampleCrosshair;

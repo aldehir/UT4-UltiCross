@@ -54,7 +54,7 @@ static SVerticalBox::FSlot& AddSlider(FText Caption) {
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
-  CrosshairViewModel = TSharedPtr<SUltiCrossConfigViewModel>(new SUltiCrossConfigViewModel(nullptr));
+  CrosshairViewModel = TSharedPtr<SUltiCrosshairViewModel>(new SUltiCrosshairViewModel(nullptr));
 
   HUD = InArgs._HUD;
 
@@ -225,7 +225,7 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
     .Content()
     [
       SNew(STextBlock)
-      .Text(CrosshairViewModel.ToSharedRef(), &SUltiCrossConfigViewModel::GetCrosshairName)
+      .Text(CrosshairViewModel.ToSharedRef(), &SUltiCrosshairViewModel::GetCrosshairName)
       .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
       .ColorAndOpacity(FLinearColor::Black)
     ];
