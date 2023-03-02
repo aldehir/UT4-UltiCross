@@ -1,5 +1,4 @@
 #include "UltiCrossPCH.h"
-
 #include "UltiCrosshairProxy.h"
 
 FUltiCrosshairProxy::FUltiCrosshairProxy()

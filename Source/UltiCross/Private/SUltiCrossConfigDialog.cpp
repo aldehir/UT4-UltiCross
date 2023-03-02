@@ -1,13 +1,11 @@
 #include "UltiCrossPCH.h"
 #include "SUltiCrossConfigDialog.h"
+#include "UltiCrosshair.h"
+
 #include "SColorPicker.h"
 
 #include "Stubs/SUTStyle.h"
 #include "Stubs/SUWindowsStyle.h"
-
-#include "UltiCrosshair.h"
-
-#include "Fixtures.h"
 
 #if !UE_SERVER
 
@@ -15,7 +13,6 @@
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
   CrosshairViewModel = TSharedPtr<SUltiCrosshairViewModel>(new SUltiCrosshairViewModel(nullptr));
-
   HUD = InArgs._HUD;
 
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
@@ -32,14 +29,6 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
   );
 
   GatherCrosshairs();
-
-  ExampleCrosshair = new FSlateBrush();
-  ExampleCrosshair->SetResourceObject(CreateExampleCrosshairTexture());
-  
-  CreateExampleCrosshairList(ExampleCrosshairList);
-  
-  ShapeList.Add(TSharedPtr<FString>(new FString("Cross")));
-  ShapeList.Add(TSharedPtr<FString>(new FString("Circle")));
   
   if (DialogContent.IsValid())
   {
@@ -115,8 +104,6 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
         .Padding(FMargin(0.0f, 15.0f, 0.0f, 15.0f))
         [
           SNew(SVerticalBox)
-          
-          // Placeholders for now
           +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->ThicknessDelegate)
           +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->LengthDelegate)
           +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GapDelegate)

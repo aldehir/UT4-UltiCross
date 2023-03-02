@@ -53,12 +53,6 @@ private:
 
   TArray<UUltiCrosshair*> Crosshairs;
   TSharedPtr<SUltiCrosshairViewModel> CrosshairViewModel;
-
-  FSlateBrush* ExampleCrosshair;
-  TArray<TSharedPtr<FString>> ExampleCrosshairList;
-
-  TArray<TSharedPtr<FString>> ShapeList;
-  TSharedPtr<STextBlock> SelectedShape;
 };
 
 #endif

@@ -1,12 +1,6 @@
 #include "UltiCrossPCH.h"
-#include "Editor.h"
-#include "TestCrosshair.h"
 #include "UltiCrosshair.h"
 #include "SUltiCrossConfigDialog.h"
-
-#include "AssetRegistryModule.h"
-
-#include "cairo/cairo.h"
 
 class FUltiCrossExecHandler : public FSelfRegisteringExec
 {
@@ -22,9 +16,6 @@ class FUltiCross : public IModuleInterface
   virtual void ShutdownModule() override;
 
 private:
-  UTestCrosshair *ExampleCrosshair;
-  UTexture2D *ExampleTexture;
-
   FUltiCrossExecHandler *ExecHandler;
 };
 
