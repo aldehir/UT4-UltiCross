@@ -1,5 +1,7 @@
 #include "../UltiCrossPCH.h"
 
+#include "UltiCrosshair.h"
+
 #include "CairoCrosshairRenderer.h"
 
 FCairoRenderContext::FCairoRenderContext(UTexture2D* Tex)
@@ -89,6 +91,11 @@ void FCairoSession::SetLineWidth(float Width)
   cairo_set_line_width(Ctx->CairoContext, Width);
 }
 
+void FCairoSession::SetOperator(ECairoOperator Op)
+{
+  cairo_set_operator(Ctx->CairoContext, (cairo_operator_t)Op);
+}
+
 void FCairoSession::Fill(const FLinearColor& Color, bool bPreserve)
 {
   cairo_set_source_rgba(Ctx->CairoContext, Color.R, Color.G, Color.B, Color.A);
@@ -121,43 +128,94 @@ FCairoCrosshairRenderer::FCairoCrosshairRenderer()
 {
 }
 
-FRenderContext* FCairoCrosshairRenderer::CreateContext(UTexture2D* Texture)
+void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
 {
-  return new FCairoRenderContext(Texture);
+  ensure(Crosshair);
+
+  FCairoRenderContext Ctx(Crosshair->GetTexture());
+
+  Ctx.Begin();
+  RenderBackground(&Ctx);
+  RenderCrosshairs(&Ctx, Crosshair);
+  RenderCircle(&Ctx, Crosshair);
+  RenderNgon(&Ctx, Crosshair);
+  RenderDot(&Ctx, Crosshair);
+  Ctx.End();
 }
 
-void FCairoCrosshairRenderer::Clear(FRenderContext *Ctx)
+void FCairoCrosshairRenderer::RenderBackground(FCairoRenderContext *Ctx)
 {
-  FCairoSession Session((FCairoRenderContext*)Ctx);
-  Session.Clear();
+  FCairoSession S(Ctx);
+  S.Clear();
 }
 
-void FCairoCrosshairRenderer::RenderCrosshairs(FRenderContext *Ctx, float Thickness, float Length, float Gap, const FLinearColor& Fill, const FLinearColor& Outline)
+void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair)
 {
-  FCairoRenderContext* RC = (FCairoRenderContext*)Ctx;
-  FCairoSession Session(RC);
+  if (Crosshair->Type != EUltiCrossCrosshairType::Crosshairs) return;
 
-  // Make sure the desired value are not out of bounds
-  Thickness = FMath::Clamp(Thickness, 1.0f, 10.0f);
-  Length = FMath::Clamp(Length, 1.0f, 30.0f);
-  Gap = FMath::Clamp(Gap, 0.0f, 10.0f);
+  bool bOffsetByOne = false;
 
-  FVector2D Center(RC->SizeX() / 2.0f, RC->SizeY() / 2.0f);
+  float Thickness = Crosshair->Thickness;
+  float Outline = Crosshair->Outline;
+  float Rotation = FMath::Clamp(Crosshair->Rotation, 0.0f, 360.0f);
 
-  Session.SetLineWidth(2.0f);
+  FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
 
-  for (int Angle = 0; Angle < 360; Angle += 90)
+  // TODO: Remove these from UUltiCrosshair
+  Params.CenterGap = Crosshair->Gap;
+  Params.Length = Crosshair->Length;
+
+  FVector2D Center(Ctx->SizeX() / 2.0f, Ctx->SizeY() / 2.0f);
+
+  // Pre-compute angles
+  TArray<float> Angles;
+
+  float AngleIncrement = 360.0f / Params.Count;
+
+  for (float Angle = 0.0f; Angle < 360.5f; Angle += AngleIncrement)
   {
-    // Rotate around the center.
-    Session.RotateAround(Center, FMath::DegreesToRadians(Angle));
+    float Wrapped = FMath::Fmod(Rotation + Angle, 360.0f);
 
-    Session.MoveTo(Center + FVector2D(-1 * Thickness, -1 * (Gap + Length)));
-    Session.RelativeLineTo(FVector2D(2 * Thickness, 0));
-    Session.RelativeLineTo(FVector2D(0, Length));
-    Session.RelativeLineTo(FVector2D(-2 * Thickness, 0));
-    Session.ClosePath();
+    // If any angle is a multiple of 90 and thickness == 0.5, then we want to offset
+    // the center by 1 in both axes to render a pixel perfect crosshair.
+    bOffsetByOne = FMath::IsNearlyZero(FMath::Fmod(Wrapped, 90.0f)) && FMath::IsNearlyEqual(Thickness, 0.5f);
 
-    Session.Stroke(Outline, true);
-    Session.Fill(Fill);
+    Angles.Add(Wrapped);
+  }
+
+  if (bOffsetByOne)
+  {
+    Center -= FVector2D(0.5f, 0.5f);
+    Params.CenterGap -= 0.5f;
+  }
+
+  for (const float Angle : Angles)
+  {
+    FCairoSession S(Ctx);
+
+    // Rotate about the center
+    S.Translate(Center);
+    S.Rotate(FMath::DegreesToRadians(Angle));
+
+    FVector2D OutlineVec(0, Outline);
+    FVector2D StartVec(0, -1 * Params.CenterGap);
+    FVector2D LengthVec(0, Params.Length);
+
+    // Draw the outline stroke first
+    S.MoveTo(StartVec + OutlineVec);
+    S.RelativeLineTo((-1 * LengthVec) - (2 * OutlineVec));
+    S.SetLineWidth(2.0f * (Outline + Thickness));
+    S.Stroke(FLinearColor::Black);
+
+    // Draw the fill
+    S.MoveTo(StartVec);
+    S.RelativeLineTo(-1 * LengthVec);
+    S.SetLineWidth(2.0f * Thickness);
+    S.SetOperator(ECairoOperator::Source);
+    S.Stroke(FLinearColor::White);
   }
 }
+
+void FCairoCrosshairRenderer::RenderCircle(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}
+void FCairoCrosshairRenderer::RenderNgon(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}
+void FCairoCrosshairRenderer::RenderDot(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}

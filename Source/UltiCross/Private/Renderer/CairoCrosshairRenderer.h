@@ -4,6 +4,8 @@
 
 #include "cairo/cairo.h"
 
+class UUltiCrosshair;
+
 class FCairoRenderContext : public FRenderContext
 {
 public:
@@ -14,6 +16,11 @@ public:
 
   cairo_surface_t* CairoSurface;
   cairo_t* CairoContext;
+};
+
+enum class ECairoOperator : uint8 {
+  Source = CAIRO_OPERATOR_SOURCE,
+  Over = CAIRO_OPERATOR_OVER
 };
 
 /**
@@ -37,6 +44,7 @@ public:
   void RotateAround(const FVector2D& P, float Angle);
 
   void SetLineWidth(float Width);
+  void SetOperator(ECairoOperator Op);
 
   void Fill(const FLinearColor& Color, bool bPreserve = false);
   void Stroke(const FLinearColor& Color, bool bPreserve = false);
@@ -50,8 +58,12 @@ class FCairoCrosshairRenderer
 public:
   FCairoCrosshairRenderer();
 
-  FRenderContext* CreateContext(UTexture2D* Texture);
+  void Render(UUltiCrosshair *Crosshair);
 
-  void Clear(FRenderContext *Ctx);
-  void RenderCrosshairs(FRenderContext *Ctx, float Thickness, float Length, float Gap, const FLinearColor& Fill, const FLinearColor& Outline);
+private:
+  void RenderBackground(FCairoRenderContext *Ctx);
+  void RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
+  void RenderCircle(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
+  void RenderNgon(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
+  void RenderDot(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
 };
