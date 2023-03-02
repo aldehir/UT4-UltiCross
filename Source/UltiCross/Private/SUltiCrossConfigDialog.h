@@ -34,6 +34,7 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   void Construct(const FArguments& InArgs);
 
   void GatherCrosshairs();
+  void OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId);
 
   TSharedRef<SComboBox<UUltiCrosshair*>> ConstructCrosshairSelection();
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);

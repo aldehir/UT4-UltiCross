@@ -27,8 +27,8 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
     .DialogAnchorPoint(InArgs._DialogAnchorPoint)
     .IsScrollable(false)
     .ContentPadding(InArgs._ContentPadding)
-    .ButtonMask(InArgs._ButtonMask)
-    .OnDialogResult(InArgs._OnDialogResult)
+    .ButtonMask(UTDIALOG_BUTTON_CLOSE)
+    .OnDialogResult(this, &SUltiCrossConfigDialog::OnDialogResult)
   );
 
   GatherCrosshairs();
@@ -233,6 +233,14 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr
       .OnValueChanged(Delegate.ToSharedRef(), &FSliderDelegate::Set)
     ]
   ];
+}
+
+void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId)
+{
+  for (UUltiCrosshair* Crosshair : Crosshairs)
+  {
+    Crosshair->SaveConfig();
+  }
 }
 
 #endif
