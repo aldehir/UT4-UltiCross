@@ -28,8 +28,9 @@ UENUM()
 enum class EUltiCrossCrosshairType : uint8
 {
     Crosshairs = 0,
-    Circle = 1,
-    Ngon = 2
+    Dot = 1,
+    Circle = 2,
+    Ngon = 3,
 };
 
 USTRUCT()

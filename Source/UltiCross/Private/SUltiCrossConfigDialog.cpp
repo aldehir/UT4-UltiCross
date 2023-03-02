@@ -12,7 +12,6 @@
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
-  CrosshairViewModel = TSharedPtr<SUltiCrosshairViewModel>(new SUltiCrosshairViewModel(nullptr));
   HUD = InArgs._HUD;
 
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
@@ -29,6 +28,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
   );
 
   GatherCrosshairs();
+  GatherCrosshairTypes();
   
   if (DialogContent.IsValid())
   {
@@ -95,27 +95,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
       .VAlign(VAlign_Fill)
       .FillWidth(1)
       [
-        SNew(SScrollBox)
-        .Style(SUWindowsStyle::Get(), "UT.ScrollBox.Borderless")
-
-        +SScrollBox::Slot()
-        .HAlign(HAlign_Fill)
-        .VAlign(VAlign_Fill)
-        .Padding(FMargin(0.0f, 15.0f, 0.0f, 15.0f))
-        [
-          SNew(SVerticalBox)
-          +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->ThicknessDelegate)
-          +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->LengthDelegate)
-          +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GapDelegate)
-
-          // +SVerticalBox::Slot()
-          // .AutoHeight()
-          // [
-          //   SNew(SColorPicker)
-          //   .DisplayInlineVersion(true)
-          //   .UseAlpha(true)
-          // ]
-        ]
+        ConstructPropertiesPanel()
       ]
     ];
   }
@@ -133,9 +113,73 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
     .Content()
     [
       SNew(STextBlock)
-      .Text(CrosshairViewModel.ToSharedRef(), &SUltiCrosshairViewModel::GetCrosshairName)
+      .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetCrosshairName)
       .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
       .ColorAndOpacity(FLinearColor::Black)
+    ];
+}
+
+TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
+{
+  return SNew(SScrollBox)
+    .Style(SUWindowsStyle::Get(), "UT.ScrollBox.Borderless")
+
+    +SScrollBox::Slot()
+    .HAlign(HAlign_Fill)
+    .VAlign(VAlign_Fill)
+    .Padding(FMargin(0.0f, 15.0f, 0.0f, 15.0f))
+    [
+      SNew(SVerticalBox)
+
+      // +SVerticalBox::Slot()
+      // .HAlign(HAlign_Fill)
+      // .AutoHeight()
+      // .Padding(FMargin(0.0f, 15.0f, 10.0f, 5.0f))
+      // [
+      //   SNew(SHorizontalBox)
+
+      //   // Caption
+      //   +SHorizontalBox::Slot()
+      //   .AutoWidth()
+      //   [
+      //     SNew(STextBlock)
+      //     .MinDesiredWidth(200)
+      //     .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+      //     .Text(FText::FromString(TEXT("Type")))
+      //   ]
+
+      //   // Combo Box
+      //   +SHorizontalBox::Slot()
+      //   .FillWidth(1)
+      //   [
+      //     SNew(SComboBox<EUltiCrossCrosshairType>)
+      //       .InitiallySelectedItem(CrosshairViewModel->GetType())
+      //       .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
+      //       .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
+      //       .OptionsSource(&Crosshairs)
+      //       .OnGenerateWidget(this, &SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget)
+      //       .OnSelectionChanged(this, &SUltiCrossConfigDialog::OnCrosshairTypeChanged)
+      //       .Content()
+      //       [
+      //         SNew(STextBlock)
+      //         .Text(CrosshairViewModel.ToSharedRef(), &FUltiCrosshairViewModel::GetCrosshairName)
+      //         .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
+      //         .ColorAndOpacity(FLinearColor::Black)
+      //       ];
+      //   ]
+      // ]
+
+      +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->ThicknessDelegate.ToSharedRef())
+      +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->LengthDelegate.ToSharedRef())
+      +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GapDelegate.ToSharedRef())
+
+      // +SVerticalBox::Slot()
+      // .AutoHeight()
+      // [
+      //   SNew(SColorPicker)
+      //   .DisplayInlineVersion(true)
+      //   .UseAlpha(true)
+      // ]
     ];
 }
 
@@ -179,7 +223,15 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
   }
 }
 
-SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr<FSliderDelegate> Delegate)
+void SUltiCrossConfigDialog::GatherCrosshairTypes()
+{
+  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Crosshairs")), EUltiCrossCrosshairType::Crosshairs));
+  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Dot")), EUltiCrossCrosshairType::Dot));
+  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Circle")), EUltiCrossCrosshairType::Circle));
+  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("N-gon")), EUltiCrossCrosshairType::Ngon));
+}
+
+SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FSliderDelegate> Delegate)
 {
   return SVerticalBox::Slot()
   .HAlign(HAlign_Fill)
@@ -206,7 +258,7 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr
       .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
       .ForegroundColor(FLinearColor::Black)
       .MinDesiredWidth(48.0f)
-      .Text(Delegate.ToSharedRef(), &FSliderDelegate::Text)
+      .Text(Delegate, &FSliderDelegate::Text)
     ]
 
     // Slider
@@ -216,8 +268,8 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr
       SNew(SSlider)
       .IndentHandle(false)
       .Style(SUTStyle::Get(), "UT.Slider")
-      .Value(Delegate.ToSharedRef(), &FSliderDelegate::Get)
-      .OnValueChanged(Delegate.ToSharedRef(), &FSliderDelegate::Set)
+      .Value(Delegate, &FSliderDelegate::Get)
+      .OnValueChanged(Delegate, &FSliderDelegate::Set)
     ]
   ];
 }

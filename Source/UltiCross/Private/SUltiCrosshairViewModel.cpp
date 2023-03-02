@@ -7,18 +7,18 @@ void FSliderDelegate::Set(float Value)
   Value = Min + ((Max - Min) * Value);
   Value = FMath::FloorToInt(Value * (1.0f / Resolution)) * Resolution;
 
-  (Model->*Setter)(Value);
+  (Obj->*Setter)(Value);
 }
 
 float FSliderDelegate::Get() const
 {
-  float Value = (Model->*Getter)();
+  float Value = (Obj->*Getter)();
   return (Value - Min) / (Max - Min);
 }
 
 FText FSliderDelegate::Text() const
 {
-  float Value = (Model->*Getter)();
+  float Value = (Obj->*Getter)();
   return FText::AsNumber(Value);
 }
 
@@ -26,9 +26,9 @@ FText FSliderDelegate::Text() const
   do { \
     Attr##Delegate = MakeShareable( \
       new FSliderDelegate( \
-        &Proxy, \
-        &FUltiCrosshairProxy::Get##Attr, \
-        &FUltiCrosshairProxy::Set##Attr, \
+        &this, \
+        &FUltiCrosshairViewModel::Get##Attr, \
+        &FUltiCrosshairViewModel::Set##Attr, \
         UltiCrosshairConstraint::Attr##Min, \
         UltiCrosshairConstraint::Attr##Max, \
         UltiCrosshairConstraint::Attr##Resolution \
@@ -36,22 +36,100 @@ FText FSliderDelegate::Text() const
     ); \
   } while (0)
 
-SUltiCrosshairViewModel::SUltiCrosshairViewModel(UUltiCrosshair *Crosshair)
+FUltiCrosshairViewModel::FUltiCrosshairViewModel()
+  : Crosshair(nullptr)
+  , CrosshairCDO(nullptr)
+  , Brush(new FSlateBrush())
 {
-  Proxy.SetCrosshair(Crosshair);
-  Brush = new FSlateBrush();
+  ThicknessDelegate = MakeShared<FSliderDelegate>(
+    this, &FUltiCrosshairViewModel::GetThickness, &FUltiCrosshairViewModel::SetThickness,
+    UltiCrosshairConstraint::ThicknessMin, UltiCrosshairConstraint::ThicknessMax,
+    UltiCrosshairConstraint::ThicknessResolution
+  );
 
-  ASSIGN_SLIDER_DELEGATE(Thickness);
-  ASSIGN_SLIDER_DELEGATE(Gap);
-  ASSIGN_SLIDER_DELEGATE(Length);
+  GapDelegate = MakeShared<FSliderDelegate>(
+    this, &FUltiCrosshairViewModel::GetGap, &FUltiCrosshairViewModel::SetGap,
+    UltiCrosshairConstraint::GapMin, UltiCrosshairConstraint::GapMax,
+    UltiCrosshairConstraint::GapResolution
+  );
+
+  LengthDelegate = MakeShared<FSliderDelegate>(
+    this, &FUltiCrosshairViewModel::GetLength, &FUltiCrosshairViewModel::SetLength,
+    UltiCrosshairConstraint::LengthMin, UltiCrosshairConstraint::LengthMax,
+    UltiCrosshairConstraint::LengthResolution
+  );
 }
 
-void SUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* Crosshair) {
-  Proxy.SetCrosshair(Crosshair);
-  Brush->SetResourceObject(Crosshair->GetTexture());
+FUltiCrosshairViewModel::~FUltiCrosshairViewModel()
+{
+  delete Brush;
 }
 
-FText SUltiCrosshairViewModel::GetCrosshairName() const
+void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
 {
-  return Proxy.GetCrosshairName();
+  Crosshair = C;
+  if (C != nullptr)
+  {
+    CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
+    Brush->SetResourceObject(C->GetTexture());
+  }
+}
+
+UUltiCrosshair* FUltiCrosshairViewModel::GetCrosshair() const
+{
+  return Crosshair;
+}
+
+FText FUltiCrosshairViewModel::GetCrosshairName() const
+{
+  return Crosshair->CrosshairName;
+}
+
+FSlateBrush* FUltiCrosshairViewModel::GetBrush() const
+{
+  return Brush;
+}
+
+EUltiCrossCrosshairType FUltiCrosshairViewModel::GetType() const
+{
+  return Crosshair->Type;
+}
+
+void FUltiCrosshairViewModel::SetType(EUltiCrossCrosshairType Type)
+{
+  Crosshair->Type = CrosshairCDO->Type = Type;
+  Crosshair->UpdateTexture();
+}
+
+float FUltiCrosshairViewModel::GetThickness() const
+{
+  return Crosshair->Thickness;
+}
+
+void FUltiCrosshairViewModel::SetThickness(float Value)
+{
+  Crosshair->Thickness = CrosshairCDO->Thickness = Value;
+  Crosshair->UpdateTexture();
+}
+
+float FUltiCrosshairViewModel::GetGap() const
+{
+  return Crosshair->Gap;
+}
+
+void FUltiCrosshairViewModel::SetGap(float Value)
+{
+  Crosshair->Gap = CrosshairCDO->Gap = Value;
+  Crosshair->UpdateTexture();
+}
+
+float FUltiCrosshairViewModel::GetLength() const
+{
+  return Crosshair->Length;
+}
+
+void FUltiCrosshairViewModel::SetLength(float Value)
+{
+  Crosshair->Length = CrosshairCDO->Length = Value;
+  Crosshair->UpdateTexture();
 }

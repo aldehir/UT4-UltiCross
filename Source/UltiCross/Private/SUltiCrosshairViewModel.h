@@ -2,25 +2,24 @@
 
 #include "Core.h"
 #include "SlateBasics.h"
-#include "UltiCrosshairProxy.h"
 
 class UUltiCrosshair;
-class SUltiCrosshairViewModel;
-
-typedef float (FUltiCrosshairProxy::*FloatGetter)() const;
-typedef void (FUltiCrosshairProxy::*FloatSetter)(float);
+class FUltiCrosshairViewModel;
 
 class FSliderDelegate
 {
 public:
+  typedef float (FUltiCrosshairViewModel::*FloatGetter)() const;
+  typedef void (FUltiCrosshairViewModel::*FloatSetter)(float);
+
   FSliderDelegate(
-    FUltiCrosshairProxy* Model,
+    FUltiCrosshairViewModel* Obj,
     FloatGetter Getter,
     FloatSetter Setter,
     float Min,
     float Max,
     float Resolution
-  ) : Model(Model)
+  ) : Obj(Obj)
     , Getter(Getter)
     , Setter(Setter)
     , Min(Min)
@@ -32,7 +31,7 @@ public:
   float Get() const;
   FText Text() const;
 
-  FUltiCrosshairProxy* Model;
+  FUltiCrosshairViewModel* Obj;
   FloatGetter Getter;
   FloatSetter Setter;
   float Min;
@@ -43,22 +42,36 @@ public:
 /**
  * Crosshair Configuration ViewModel.
  */
-class SUltiCrosshairViewModel
+class FUltiCrosshairViewModel
 {
 public:
-  SUltiCrosshairViewModel(UUltiCrosshair *Crosshair);
+  FUltiCrosshairViewModel();
+  ~FUltiCrosshairViewModel();
 
   void SetCrosshair(UUltiCrosshair* Crosshair);
-  inline UUltiCrosshair* GetCrosshair() const { return Proxy.GetCrosshair(); }
+  UUltiCrosshair* GetCrosshair() const;
 
   FText GetCrosshairName() const;
-  FSlateBrush* GetBrush() const { return Brush; }
+  FSlateBrush* GetBrush() const;
 
-  TSharedPtr<FSliderDelegate> ThicknessDelegate;
-  TSharedPtr<FSliderDelegate> GapDelegate;
-  TSharedPtr<FSliderDelegate> LengthDelegate;
+  EUltiCrossCrosshairType GetType() const;
+  void SetType(EUltiCrossCrosshairType Type);
+
+  float GetThickness() const;
+  void SetThickness(float Value);
+
+  float GetGap() const;
+  void SetGap(float Value);
+
+  float GetLength() const;
+  void SetLength(float Value);
+
+  TSharedPtr<FSliderDelegate> ThicknessDelegate; 
+  TSharedPtr<FSliderDelegate> GapDelegate; 
+  TSharedPtr<FSliderDelegate> LengthDelegate; 
 
 private:
-  FUltiCrosshairProxy Proxy;
+  UUltiCrosshair* Crosshair;
+  UUltiCrosshair* CrosshairCDO;
   FSlateBrush* Brush;
 };

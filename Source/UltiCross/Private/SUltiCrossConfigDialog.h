@@ -31,18 +31,25 @@ class SUltiCrossConfigDialog : public SUTDialogBase
   SLATE_EVENT(FDialogResultDelegate, OnDialogResult)
   SLATE_END_ARGS()
 
+public:
+  SUltiCrossConfigDialog()
+  : CrosshairViewModel(new FUltiCrosshairViewModel)
+  {}
+
   void Construct(const FArguments& InArgs);
 
   void GatherCrosshairs();
+  void GatherCrosshairTypes();
   void OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId);
 
   TSharedRef<SComboBox<UUltiCrosshair*>> ConstructCrosshairSelection();
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
 
-  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedPtr<FSliderDelegate> Delegate);
+  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FSliderDelegate> Delegate);
 
-public:
+  TSharedRef<SWidget> ConstructPropertiesPanel();
+
   virtual bool bRemainOPenThroughTravel()
   {
     return true;
@@ -50,9 +57,11 @@ public:
 
 private:
   TWeakObjectPtr<class AUTHUD> HUD;
+  TSharedRef<FUltiCrosshairViewModel> CrosshairViewModel;
 
   TArray<UUltiCrosshair*> Crosshairs;
-  TSharedPtr<SUltiCrosshairViewModel> CrosshairViewModel;
+
+  TArray<TPair<FText, EUltiCrossCrosshairType>> CrosshairTypes;
 };
 
 #endif
