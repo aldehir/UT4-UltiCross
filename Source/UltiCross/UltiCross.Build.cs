@@ -12,7 +12,6 @@ public class UltiCross : ModuleRules
           "CoreUObject",
           "Engine",
           "InputCore",
-          "UnrealEd",
           "UnrealTournament",
           "AssetRegistry",
           "AppFramework",
