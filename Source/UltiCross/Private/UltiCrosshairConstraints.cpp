@@ -107,7 +107,7 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Circle.Radius");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 60.0f, 1.0f);
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 30.0f, 1.0f);
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Ngon.Edges");

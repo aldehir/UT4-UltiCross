@@ -73,7 +73,8 @@ struct FRenderContext
 
   int Width;
   int Height;
-  bool bOffByOne;
+  FVector2D Center;
+  bool bOffCenter;
   int Render;
 };
 

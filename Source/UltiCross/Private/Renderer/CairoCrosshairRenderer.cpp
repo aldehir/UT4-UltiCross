@@ -73,7 +73,8 @@ void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
   Ctx.Crosshair = Crosshair;
   Ctx.Width = Width;
   Ctx.Height = Height;
-  Ctx.bOffByOne = false;
+  Ctx.Center = FVector2D(Width * 0.5f, Height * 0.5f);
+  Ctx.bOffCenter = false;
   Ctx.Render = RenderAll;
 
   RenderBackground(Cairo, Ctx);
@@ -113,8 +114,6 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   // Do nothing if length = 0
   if (FMath::IsNearlyZero(Params.Length)) return;
 
-  FVector2D Center(Ctx.Width * 0.5f, Ctx.Height * 0.5f);
-
   // Pre-compute angles
   TArray<float> Angles;
 
@@ -126,15 +125,17 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
 
     // If any angle is a multiple of 90 and thickness == 0.5, then we want to offset
     // the center by 1 in both axes to render a pixel perfect crosshair.
-    Ctx.bOffByOne = FMath::IsNearlyZero(FMath::Fmod(Wrapped, 90.0f)) && FMath::IsNearlyEqual(Thickness, 0.5f);
+    bool isOff = FMath::IsNearlyZero(FMath::Fmod(Wrapped, 90.0f)) && FMath::IsNearlyEqual(Thickness, 0.5f);
+
+    if (isOff && !Ctx.bOffCenter)
+    {
+      // Make sure we only compute this once and not again on a second pass
+      Ctx.bOffCenter = true;
+      Ctx.Center = Ctx.Center - 0.5f;
+      Params.CenterGap -= 0.5f;
+    }
 
     Angles.Add(Wrapped);
-  }
-
-  if (Ctx.bOffByOne)
-  {
-    Center -= FVector2D(0.5f, 0.5f);
-    Params.CenterGap -= 0.5f;
   }
 
   for (const float Angle : Angles)
@@ -142,7 +143,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
     Cairo.Save();
 
     // Rotate about the center
-    Cairo.Translate(Center);
+    Cairo.Translate(Ctx.Center);
     Cairo.Rotate(FMath::DegreesToRadians(Angle));
 
     FVector2D OutlineVec(0, Outline);
@@ -176,7 +177,46 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   }
 }
 
-void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext& Ctx) {}
+void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext& Ctx)
+{
+  UUltiCrosshair* Crosshair = Ctx.Crosshair;
+
+  float Thickness = Crosshair->Thickness;
+  float Outline = Crosshair->Outline;
+  float Radius = Crosshair->Circle.Radius;
+
+  if (FMath::IsNearlyZero(Radius)) return;
+
+  // Adjust radius for better pixel alignment
+  if (Ctx.bOffCenter || (!Ctx.bOffCenter && FMath::RoundToInt(Thickness) % 2 == 1))
+  {
+    Radius = Radius - 0.5f;
+  }
+
+  Cairo.Save();
+
+  Cairo.Arc(Ctx.Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
+  Cairo.ClosePath();
+
+  Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);
+
+  if (Ctx.Render & RenderStroke && !FMath::IsNearlyZero(Outline))
+  {
+    Cairo.SetLineWidth((2.0f * Outline) + Thickness);
+    Cairo.SetSourceRGBA(Crosshair->Color.Outline);
+    Cairo.StrokePreserve();
+  }
+
+  if (Ctx.Render & RenderFill)
+  {
+    Cairo.SetLineWidth(Thickness);
+    Cairo.SetSourceRGBA(Crosshair->Color.Fill);
+    Cairo.Stroke();
+  }
+
+  Cairo.Restore();
+}
+
 void FCairoCrosshairRenderer::RenderNgon(FCairoContext& Cairo, FRenderContext& Ctx) {}
 
 void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ctx)
@@ -188,18 +228,14 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
 
   if (FMath::IsNearlyZero(Radius)) return;
 
-  FVector2D Center(Ctx.Width * 0.5f, Ctx.Height * 0.5f);
-
-  // Adjust to maintain a good look if rendering 1px thin crosshairs
-  if (Ctx.bOffByOne)
+  if (Ctx.bOffCenter)
   {
     Radius = Radius - 0.5f;
-    Center = Center - 0.5f;
   }
 
   Cairo.Save();
 
-  Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
+  Cairo.Arc(Ctx.Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
   Cairo.ClosePath();
 
   Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);

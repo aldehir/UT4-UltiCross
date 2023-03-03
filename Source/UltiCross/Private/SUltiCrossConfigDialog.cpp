@@ -196,7 +196,9 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
 
         +SWidgetSwitcher::Slot()
         [
-          SNew(SCanvas)
+          SNew(SVerticalBox)
+
+          +AddSlider(FText::FromString(TEXT("Radius")), CrosshairViewModel->GetDelegate("Circle.Radius"))
         ]
 
         +SWidgetSwitcher::Slot()

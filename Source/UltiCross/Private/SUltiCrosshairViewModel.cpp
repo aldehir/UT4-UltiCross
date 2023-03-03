@@ -145,6 +145,13 @@ FText FUltiCrosshairViewModel::GetTypeText() const
 void FUltiCrosshairViewModel::OnTypeChanged(TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor, ESelectInfo::Type SelectType)
 {
   Crosshair->Type = CrosshairCDO->Type = Descriptor->Type;
+
+  // A change in type may have triggered other constraints
+  for (const TPair<FString, TSharedRef<FConstrainedSliderDelegate>>& Pair : Delegates)
+  {
+    Pair.Value->CacheReferences();
+  }
+
   Crosshair->UpdateTexture();
 }
 
