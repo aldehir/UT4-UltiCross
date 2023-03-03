@@ -302,25 +302,37 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget(TSha
 
 void SUltiCrossConfigDialog::GatherCrosshairs()
 {
-  if (HUD == nullptr)
-  {
-    return;
-  }
+  FName NAME_GeneratedClass(TEXT("GeneratedClass"));
 
-  for (const TPair<FName, UUTCrosshair*>& Pair : HUD->Crosshairs)
+  // Load all Blueprint crosshairs that inherit UUlitCrosshair
+  Crosshairs.Empty();
+  TArray<FAssetData> AssetList;
+  GetAllBlueprintAssetData(UUltiCrosshair::StaticClass(), AssetList);
+
+  for (const FAssetData& Asset : AssetList)
   {
-    UUltiCrosshair *UltiCrosshair = Cast<UUltiCrosshair>(Pair.Value);
-    if (UltiCrosshair == nullptr)
+    const FString* ClassPath = Asset.TagsAndValues.Find(NAME_GeneratedClass);
+    UClass* CrosshairClass = LoadObject<UClass>(NULL, **ClassPath);
+    if (CrosshairClass == nullptr) continue;
+
+    UUltiCrosshair* Crosshair = NewObject<UUltiCrosshair>(GetPlayerOwner().Get(), CrosshairClass, NAME_None, RF_NoFlags);
+    if (Crosshair)
     {
-      continue;
+      Crosshairs.Add(Crosshair);
     }
-
-    Crosshairs.Add(UltiCrosshair);
   }
 
   if (Crosshairs.Num() > 0)
   {
     CrosshairViewModel->SetCrosshair(Crosshairs[0]);
+  }
+}
+
+void SUltiCrossConfigDialog::AddReferencedObjects(FReferenceCollector& Collector)
+{
+  for (int32 i = 0; i < Crosshairs.Num(); ++i)
+  {
+    Collector.AddReferencedObject(Crosshairs[i]);
   }
 }
 

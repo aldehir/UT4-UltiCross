@@ -8,7 +8,7 @@
 
 class UUltiCrosshair;
 
-class SUltiCrossConfigDialog : public SUTDialogBase
+class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
 {
   SLATE_BEGIN_ARGS(SUltiCrossConfigDialog)
   : _DialogTitle(FText::FromString(TEXT("UltiCross Configuration")))
@@ -37,6 +37,7 @@ public:
   {}
 
   void Construct(const FArguments& InArgs);
+  void AddReferencedObjects(FReferenceCollector& Collector) override;
 
   void GatherCrosshairs();
   void OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId);
