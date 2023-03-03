@@ -105,11 +105,11 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
 
   if (Crosshair->Type != EUltiCrossCrosshairType::Crosshairs) return;
 
-  float Thickness = Crosshair->Thickness;
+  FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
+
   float Outline = Crosshair->Outline;
   float Rotation = FMath::Clamp(Crosshair->Rotation, 0.0f, 360.0f);
-
-  FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
+  float Thickness = Params.Thickness;
 
   // Do nothing if length = 0
   if (FMath::IsNearlyZero(Params.Length)) return;
@@ -181,8 +181,8 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
 {
   UUltiCrosshair* Crosshair = Ctx.Crosshair;
 
-  float Thickness = Crosshair->Thickness;
   float Outline = Crosshair->Outline;
+  float Thickness = Crosshair->Circle.Thickness;
   float Radius = Crosshair->Circle.Radius;
 
   if (FMath::IsNearlyZero(Radius)) return;

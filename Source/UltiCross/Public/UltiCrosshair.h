@@ -13,10 +13,14 @@ struct FUltiCrossCrosshairParams
   GENERATED_USTRUCT_BODY()
 
   FUltiCrossCrosshairParams()
-  : Count(4)
+  : Thickness(1.0f)
+  , Count(4)
   , CenterGap(4.0f)
   , Length(8.0f)
   {}
+
+  UPROPERTY()
+  float Thickness;
 
   UPROPERTY()
   uint32 Count;
@@ -34,8 +38,12 @@ struct FUltiCrossCircleParams
   GENERATED_USTRUCT_BODY()
 
   FUltiCrossCircleParams()
-  : Radius(8.0f)
+  : Thickness(2.0f)
+  , Radius(8.0f)
   {}
+
+  UPROPERTY()
+  float Thickness;
 
   UPROPERTY()
   float Radius;
@@ -47,12 +55,16 @@ struct FUltiCrossNgonParams
   GENERATED_USTRUCT_BODY()
 
   FUltiCrossNgonParams()
-  : Edges(3)
+  : Thickness(1.0f)
+  , Edges(3)
   , RadiusX(22.0f)
   , RadiusY(18.0f)
   , OffsetX(0.0f)
   , OffsetY(-2.0f)
   {}
+
+  UPROPERTY()
+  float Thickness;
 
   UPROPERTY()
   uint32 Edges;
@@ -99,10 +111,6 @@ public:
   /** Crosshair Type */
   UPROPERTY(Config)
   EUltiCrossCrosshairType Type;
-
-  /** Thickness */
-  UPROPERTY(Config)
-  float Thickness;
 
   /** Outline Thickness */
   UPROPERTY(Config)

@@ -169,8 +169,6 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
         ]
       ]
 
-      +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
-
       // Crosshair Type Specific Settings
       +SVerticalBox::Slot()
       .HAlign(HAlign_Fill)
@@ -184,6 +182,7 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
         [
           SNew(SVerticalBox)
 
+          +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Crosshairs.Thickness"))
           +AddSlider(FText::FromString(TEXT("Count")), CrosshairViewModel->GetDelegate("Crosshairs.Count"))
           +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Crosshairs.Length"))
           +AddSlider(FText::FromString(TEXT("Center Gap")), CrosshairViewModel->GetDelegate("Crosshairs.CenterGap"))
@@ -198,6 +197,7 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
         [
           SNew(SVerticalBox)
 
+          +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Circle.Thickness"))
           +AddSlider(FText::FromString(TEXT("Radius")), CrosshairViewModel->GetDelegate("Circle.Radius"))
         ]
 
