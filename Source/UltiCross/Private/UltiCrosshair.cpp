@@ -28,8 +28,6 @@ TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString
 
 void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply)
 {
-  float HUDCrosshairScale = (TargetHUD == nullptr ? 1.0f : TargetHUD->GetCrosshairScale());
-
   float Width = Texture->GetSurfaceWidth();
   float Height = Texture->GetSurfaceHeight();
 
