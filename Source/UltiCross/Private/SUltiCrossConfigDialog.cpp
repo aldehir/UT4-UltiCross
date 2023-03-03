@@ -169,9 +169,9 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
       //   ]
       // ]
 
-      +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->ThicknessDelegate.ToSharedRef())
-      +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->LengthDelegate.ToSharedRef())
-      +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GapDelegate.ToSharedRef())
+      +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
+      +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Length"))
+      +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GetDelegate("Gap"))
 
       // +SVerticalBox::Slot()
       // .AutoHeight()
@@ -231,7 +231,7 @@ void SUltiCrossConfigDialog::GatherCrosshairTypes()
   CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("N-gon")), EUltiCrossCrosshairType::Ngon));
 }
 
-SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FSliderDelegate> Delegate)
+SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate)
 {
   return SVerticalBox::Slot()
   .HAlign(HAlign_Fill)
@@ -258,7 +258,7 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
       .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
       .ForegroundColor(FLinearColor::Black)
       .MinDesiredWidth(48.0f)
-      .Text(Delegate, &FSliderDelegate::Text)
+      .Text(Delegate, &FConstrainedSliderDelegate::Text)
     ]
 
     // Slider
@@ -268,8 +268,8 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
       SNew(SSlider)
       .IndentHandle(false)
       .Style(SUTStyle::Get(), "UT.Slider")
-      .Value(Delegate, &FSliderDelegate::Get)
-      .OnValueChanged(Delegate, &FSliderDelegate::Set)
+      .Value(Delegate, &FConstrainedSliderDelegate::Get)
+      .OnValueChanged(Delegate, &FConstrainedSliderDelegate::Set)
     ]
   ];
 }

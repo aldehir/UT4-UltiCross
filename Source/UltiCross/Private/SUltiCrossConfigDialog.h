@@ -46,7 +46,7 @@ public:
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
 
-  SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FSliderDelegate> Delegate);
+  SVerticalBox::FSlot& AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate);
 
   TSharedRef<SWidget> ConstructPropertiesPanel();
 

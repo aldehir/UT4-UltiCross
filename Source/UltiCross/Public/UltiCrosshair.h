@@ -2,36 +2,10 @@
 
 #include "Object.h"
 #include "UTCrosshair.h"
+#include "UltiCrosshairTypes.h"
+#include "UltiCrosshairConstraints.h"
+
 #include "UltiCrosshair.generated.h"
-
-#define ULTICROSS_THICKNESS_MIN 1.0f
-#define ULTICROSS_THICKNESS_MAX 11.0f
-#define ULTICROSS_THICKNESS_DELTA (ULTICROSS_THICKNESS_MAX - ULTICROSS_THICKNESS_MIN)
-
-/** Constraints */
-namespace UltiCrosshairConstraint
-{
-  extern const float ThicknessMin;
-  extern const float ThicknessMax;
-  extern const float ThicknessResolution;
-
-  extern const float GapMin;
-  extern const float GapMax;
-  extern const float GapResolution;
-
-  extern const float LengthMin;
-  extern const float LengthMax;
-  extern const float LengthResolution;
-};
-
-UENUM()
-enum class EUltiCrossCrosshairType : uint8
-{
-    Crosshairs = 0,
-    Dot = 1,
-    Circle = 2,
-    Ngon = 3,
-};
 
 USTRUCT()
 struct FUltiCrossCrosshairParams
@@ -145,6 +119,7 @@ public:
   void UpdateTexture();
 
   UTexture2D *GetTexture() { return Texture; }
+  TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
   void PostInitProperties() override;
 

@@ -1,63 +1,65 @@
 #include "UltiCrossPCH.h"
 #include "SUltiCrosshairViewModel.h"
 #include "UltiCrosshair.h"
+#include "FindProperty.h"
 
-void FSliderDelegate::Set(float Value)
+FConstrainedSliderDelegate::FConstrainedSliderDelegate(FUltiCrosshairViewModel* ViewModel, const FString& PropertyPath)
+  : ViewModel(ViewModel)
+  , PropertyPath(PropertyPath)
 {
-  Value = Min + ((Max - Min) * Value);
-  Value = FMath::FloorToInt(Value * (1.0f / Resolution)) * Resolution;
-
-  (Obj->*Setter)(Value);
+  check(ViewModel);
 }
 
-float FSliderDelegate::Get() const
+float FConstrainedSliderDelegate::Get() const
 {
-  float Value = (Obj->*Getter)();
-  return (Value - Min) / (Max - Min);
+  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
+  TSharedRef<FUltiCrosshairConstraint> Constraint = Inst->GetConstraint(PropertyPath);
+  return Constraint->Normalize(GetRaw());
 }
 
-FText FSliderDelegate::Text() const
+float FConstrainedSliderDelegate::GetRaw() const
 {
-  float Value = (Obj->*Getter)();
-  return FText::AsNumber(Value);
+  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
+
+  void* Data = nullptr;
+  UNumericProperty* Prop = FindPropertyChecked<UNumericProperty>(Inst, PropertyPath, &Data);
+
+  if (Prop->IsInteger()) {
+    return (float)Prop->GetSignedIntPropertyValue(Data);
+  }
+
+  return Prop->GetFloatingPointPropertyValue(Data);
 }
 
-#define ASSIGN_SLIDER_DELEGATE(Attr) \
-  do { \
-    Attr##Delegate = MakeShareable( \
-      new FSliderDelegate( \
-        &this, \
-        &FUltiCrosshairViewModel::Get##Attr, \
-        &FUltiCrosshairViewModel::Set##Attr, \
-        UltiCrosshairConstraint::Attr##Min, \
-        UltiCrosshairConstraint::Attr##Max, \
-        UltiCrosshairConstraint::Attr##Resolution \
-      ) \
-    ); \
-  } while (0)
+void FConstrainedSliderDelegate::Set(float Value)
+{
+  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
+  TSharedRef<FUltiCrosshairConstraint> Constraint = Inst->GetConstraint(PropertyPath);
+
+  Value = Constraint->Denormalize(Value);
+
+  void* Data = nullptr;
+  UNumericProperty* Prop = FindPropertyChecked<UNumericProperty>(Inst, PropertyPath, &Data);
+
+  if (Prop->IsInteger()) {
+    Prop->SetIntPropertyValue(Data, (int64)Value);
+  } else {
+    Prop->SetFloatingPointPropertyValue(Data, Value);
+  }
+
+  Inst->UpdateTexture();
+}
+
+FText FConstrainedSliderDelegate::Text() const
+{
+  return FText::AsNumber(GetRaw());
+}
 
 FUltiCrosshairViewModel::FUltiCrosshairViewModel()
   : Crosshair(nullptr)
   , CrosshairCDO(nullptr)
   , Brush(new FSlateBrush())
 {
-  ThicknessDelegate = MakeShared<FSliderDelegate>(
-    this, &FUltiCrosshairViewModel::GetThickness, &FUltiCrosshairViewModel::SetThickness,
-    UltiCrosshairConstraint::ThicknessMin, UltiCrosshairConstraint::ThicknessMax,
-    UltiCrosshairConstraint::ThicknessResolution
-  );
-
-  GapDelegate = MakeShared<FSliderDelegate>(
-    this, &FUltiCrosshairViewModel::GetGap, &FUltiCrosshairViewModel::SetGap,
-    UltiCrosshairConstraint::GapMin, UltiCrosshairConstraint::GapMax,
-    UltiCrosshairConstraint::GapResolution
-  );
-
-  LengthDelegate = MakeShared<FSliderDelegate>(
-    this, &FUltiCrosshairViewModel::GetLength, &FUltiCrosshairViewModel::SetLength,
-    UltiCrosshairConstraint::LengthMin, UltiCrosshairConstraint::LengthMax,
-    UltiCrosshairConstraint::LengthResolution
-  );
 }
 
 FUltiCrosshairViewModel::~FUltiCrosshairViewModel()
@@ -67,12 +69,10 @@ FUltiCrosshairViewModel::~FUltiCrosshairViewModel()
 
 void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
 {
+  check(C);
   Crosshair = C;
-  if (C != nullptr)
-  {
-    CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
-    Brush->SetResourceObject(C->GetTexture());
-  }
+  CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
+  Brush->SetResourceObject(C->GetTexture());
 }
 
 UUltiCrosshair* FUltiCrosshairViewModel::GetCrosshair() const
@@ -101,35 +101,15 @@ void FUltiCrosshairViewModel::SetType(EUltiCrossCrosshairType Type)
   Crosshair->UpdateTexture();
 }
 
-float FUltiCrosshairViewModel::GetThickness() const
+TSharedRef<FConstrainedSliderDelegate> FUltiCrosshairViewModel::GetDelegate(const FString& Path)
 {
-  return Crosshair->Thickness;
-}
+  TSharedRef<FConstrainedSliderDelegate>* Search = Delegates.Find(Path);
+  if (Search != nullptr)
+  {
+    return *Search;
+  }
 
-void FUltiCrosshairViewModel::SetThickness(float Value)
-{
-  Crosshair->Thickness = CrosshairCDO->Thickness = Value;
-  Crosshair->UpdateTexture();
-}
-
-float FUltiCrosshairViewModel::GetGap() const
-{
-  return Crosshair->Gap;
-}
-
-void FUltiCrosshairViewModel::SetGap(float Value)
-{
-  Crosshair->Gap = CrosshairCDO->Gap = Value;
-  Crosshair->UpdateTexture();
-}
-
-float FUltiCrosshairViewModel::GetLength() const
-{
-  return Crosshair->Length;
-}
-
-void FUltiCrosshairViewModel::SetLength(float Value)
-{
-  Crosshair->Length = CrosshairCDO->Length = Value;
-  Crosshair->UpdateTexture();
+  TSharedRef<FConstrainedSliderDelegate> Delegate = MakeShared<FConstrainedSliderDelegate>(this, Path);
+  Delegates.Add(Path, Delegate);
+  return Delegate;
 }
