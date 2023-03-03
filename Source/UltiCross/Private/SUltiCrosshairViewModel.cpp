@@ -1,4 +1,5 @@
 #include "UltiCrossPCH.h"
+#include "SUltiCrossConfigDialog.h"
 #include "SUltiCrosshairViewModel.h"
 #include "UltiCrosshair.h"
 #include "FindProperty.h"
@@ -76,11 +77,17 @@ FText FConstrainedSliderDelegate::Text() const
   return FText::AsNumber(GetRaw());
 }
 
-FUltiCrosshairViewModel::FUltiCrosshairViewModel()
-  : Crosshair(nullptr)
+FUltiCrosshairViewModel::FUltiCrosshairViewModel(SUltiCrossConfigDialog * View)
+  : View(View)
+  , Crosshair(nullptr)
   , CrosshairCDO(nullptr)
   , Brush(new FSlateBrush())
 {
+  // Populate Crosshair Types
+  CrosshairTypes.Add(MakeTypeDescriptor(EUltiCrossCrosshairType::Crosshairs, TEXT("Crosshairs")));
+  CrosshairTypes.Add(MakeTypeDescriptor(EUltiCrossCrosshairType::Dot, TEXT("Dot")));
+  CrosshairTypes.Add(MakeTypeDescriptor(EUltiCrossCrosshairType::Circle, TEXT("Circle")));
+  CrosshairTypes.Add(MakeTypeDescriptor(EUltiCrossCrosshairType::Ngon, TEXT("N-gon")));
 }
 
 FUltiCrosshairViewModel::~FUltiCrosshairViewModel()
@@ -100,6 +107,13 @@ void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
   {
     Pair.Value->CacheReferences();
   }
+
+  // The view needs to update the selected type when the crosshair seletion is
+  // changed
+  if (View->CrosshairTypeComboBox.IsValid())
+  {
+    View->CrosshairTypeComboBox->SetSelectedItem(GetCrosshairTypeDescriptor());
+  }
 }
 
 UUltiCrosshair* FUltiCrosshairViewModel::GetCrosshair() const
@@ -117,15 +131,34 @@ FSlateBrush* FUltiCrosshairViewModel::GetBrush() const
   return Brush;
 }
 
-EUltiCrossCrosshairType FUltiCrosshairViewModel::GetType() const
+FText FUltiCrosshairViewModel::GetTypeText() const
 {
-  return Crosshair->Type;
+  TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor = GetCrosshairTypeDescriptor();
+  if (!Descriptor.IsValid())
+  {
+    return FText();
+  }
+
+  return Descriptor->Text();
 }
 
-void FUltiCrosshairViewModel::SetType(EUltiCrossCrosshairType Type)
+void FUltiCrosshairViewModel::OnTypeChanged(TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor, ESelectInfo::Type SelectType)
 {
-  Crosshair->Type = CrosshairCDO->Type = Type;
+  Crosshair->Type = CrosshairCDO->Type = Descriptor->Type;
   Crosshair->UpdateTexture();
+}
+
+TSharedPtr<FUltiCrosshairTypeDescriptor> FUltiCrosshairViewModel::GetCrosshairTypeDescriptor() const
+{
+  for (TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor : CrosshairTypes)
+  {
+    if (Descriptor->Type == Crosshair->Type)
+    {
+      return Descriptor;
+    }
+  }
+
+  return nullptr;
 }
 
 TSharedRef<FConstrainedSliderDelegate> FUltiCrosshairViewModel::GetDelegate(const FString& Path)

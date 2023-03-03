@@ -6,6 +6,9 @@
 
 class UUltiCrosshair;
 class FUltiCrosshairViewModel;
+struct FUltiCrosshairTypeDescriptor;
+
+class SUltiCrossConfigDialog;
 
 class FConstrainedSliderDelegate
 {
@@ -42,7 +45,7 @@ private:
 class FUltiCrosshairViewModel
 {
 public:
-  FUltiCrosshairViewModel();
+  FUltiCrosshairViewModel(SUltiCrossConfigDialog* View);
   ~FUltiCrosshairViewModel();
 
   void SetCrosshair(UUltiCrosshair* Crosshair);
@@ -51,15 +54,39 @@ public:
   FText GetCrosshairName() const;
   FSlateBrush* GetBrush() const;
 
-  EUltiCrossCrosshairType GetType() const;
-  void SetType(EUltiCrossCrosshairType Type);
+  FText GetTypeText() const;
+  void OnTypeChanged(TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor, ESelectInfo::Type SelectType);
+  TArray<TSharedPtr<FUltiCrosshairTypeDescriptor>>* GetCrosshairTypeDescriptors() { return &CrosshairTypes; }
+  TSharedPtr<FUltiCrosshairTypeDescriptor> GetCrosshairTypeDescriptor() const;
 
   TSharedRef<FConstrainedSliderDelegate> GetDelegate(const FString& Path);
 
 private:
+  SUltiCrossConfigDialog* View;
+
   UUltiCrosshair* Crosshair;
   UUltiCrosshair* CrosshairCDO;
   FSlateBrush* Brush;
 
+  TArray<TSharedPtr<FUltiCrosshairTypeDescriptor>> CrosshairTypes;
   TMap<FString, TSharedRef<FConstrainedSliderDelegate>> Delegates;
 };
+
+struct FUltiCrosshairTypeDescriptor
+{
+  FUltiCrosshairTypeDescriptor(EUltiCrossCrosshairType Type, const FString& Description)
+    : Type(Type), Description(Description)
+  {}
+
+  EUltiCrossCrosshairType Type;
+  FString Description;
+
+  FText Text() const {
+    return FText::FromString(Description);
+  }
+};
+
+TSharedPtr<FUltiCrosshairTypeDescriptor> MakeTypeDescriptor(EUltiCrossCrosshairType Type, const FString& Description)
+{
+  return MakeShareable(new FUltiCrosshairTypeDescriptor(Type, Description));
+}

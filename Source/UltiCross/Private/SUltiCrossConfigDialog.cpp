@@ -28,7 +28,6 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
   );
 
   GatherCrosshairs();
-  GatherCrosshairTypes();
   
   if (DialogContent.IsValid())
   {
@@ -131,43 +130,43 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
     [
       SNew(SVerticalBox)
 
-      // +SVerticalBox::Slot()
-      // .HAlign(HAlign_Fill)
-      // .AutoHeight()
-      // .Padding(FMargin(0.0f, 15.0f, 10.0f, 5.0f))
-      // [
-      //   SNew(SHorizontalBox)
+      +SVerticalBox::Slot()
+      .HAlign(HAlign_Fill)
+      .AutoHeight()
+      .Padding(FMargin(40.0f, 0.0f, 10.0f, 5.0f))
+      [
+        SNew(SHorizontalBox)
 
-      //   // Caption
-      //   +SHorizontalBox::Slot()
-      //   .AutoWidth()
-      //   [
-      //     SNew(STextBlock)
-      //     .MinDesiredWidth(200)
-      //     .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
-      //     .Text(FText::FromString(TEXT("Type")))
-      //   ]
+        // Caption
+        +SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+          SNew(STextBlock)
+          .MinDesiredWidth(200)
+          .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+          .Text(FText::FromString(TEXT("Type")))
+        ]
 
-      //   // Combo Box
-      //   +SHorizontalBox::Slot()
-      //   .FillWidth(1)
-      //   [
-      //     SNew(SComboBox<EUltiCrossCrosshairType>)
-      //       .InitiallySelectedItem(CrosshairViewModel->GetType())
-      //       .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
-      //       .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
-      //       .OptionsSource(&Crosshairs)
-      //       .OnGenerateWidget(this, &SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget)
-      //       .OnSelectionChanged(this, &SUltiCrossConfigDialog::OnCrosshairTypeChanged)
-      //       .Content()
-      //       [
-      //         SNew(STextBlock)
-      //         .Text(CrosshairViewModel.ToSharedRef(), &FUltiCrosshairViewModel::GetCrosshairName)
-      //         .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
-      //         .ColorAndOpacity(FLinearColor::Black)
-      //       ];
-      //   ]
-      // ]
+        // Combo Box
+        +SHorizontalBox::Slot()
+        .FillWidth(1)
+        [
+          SAssignNew(CrosshairTypeComboBox, SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>)
+          .InitiallySelectedItem(CrosshairViewModel->GetCrosshairTypeDescriptor())
+          .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
+          .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
+          .OptionsSource(CrosshairViewModel->GetCrosshairTypeDescriptors())
+          .OnGenerateWidget(this, &SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget)
+          .OnSelectionChanged(CrosshairViewModel, &FUltiCrosshairViewModel::OnTypeChanged)
+          .Content()
+          [
+            SNew(STextBlock)
+            .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetTypeText)
+            .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
+            .ColorAndOpacity(FLinearColor::Black)
+          ]
+        ]
+      ]
 
       +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
       +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Length"))
@@ -190,13 +189,24 @@ void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ES
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
 {
-	return SNew(SBox)
-		.Padding(5)
-		[
-			SNew(STextBlock)
-			.Text(InItem->CrosshairName)
-			.TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
-		];
+  return SNew(SBox)
+    .Padding(5)
+    [
+      SNew(STextBlock)
+      .Text(InItem->CrosshairName)
+      .TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
+    ];
+}
+
+TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget(TSharedPtr<FUltiCrosshairTypeDescriptor> InItem)
+{
+  return SNew(SBox)
+    .Padding(5)
+    [
+      SNew(STextBlock)
+      .Text(InItem->Text())
+      .TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
+    ];
 }
 
 void SUltiCrossConfigDialog::GatherCrosshairs()
@@ -223,14 +233,6 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
   }
 }
 
-void SUltiCrossConfigDialog::GatherCrosshairTypes()
-{
-  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Crosshairs")), EUltiCrossCrosshairType::Crosshairs));
-  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Dot")), EUltiCrossCrosshairType::Dot));
-  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("Circle")), EUltiCrossCrosshairType::Circle));
-  CrosshairTypes.Add(TPairInitializer<FText, EUltiCrossCrosshairType>(FText::FromString(TEXT("N-gon")), EUltiCrossCrosshairType::Ngon));
-}
-
 SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate)
 {
   return SVerticalBox::Slot()
@@ -250,26 +252,32 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
       .Text(Caption)
     ]
 
-    // Edit Box
-    +SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-      SNew(SEditableTextBox)
-      .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
-      .ForegroundColor(FLinearColor::Black)
-      .MinDesiredWidth(48.0f)
-      .Text(Delegate, &FConstrainedSliderDelegate::Text)
-    ]
-
-    // Slider
     +SHorizontalBox::Slot()
     .FillWidth(1)
     [
-      SNew(SSlider)
-      .IndentHandle(false)
-      .Style(SUTStyle::Get(), "UT.Slider")
-      .Value(Delegate, &FConstrainedSliderDelegate::Get)
-      .OnValueChanged(Delegate, &FConstrainedSliderDelegate::Set)
+      SNew(SHorizontalBox)
+
+      // Edit Box
+      +SHorizontalBox::Slot()
+      .AutoWidth()
+      [
+        SNew(SEditableTextBox)
+        .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
+        .ForegroundColor(FLinearColor::Black)
+        .MinDesiredWidth(48.0f)
+        .Text(Delegate, &FConstrainedSliderDelegate::Text)
+      ]
+
+      // Slider
+      +SHorizontalBox::Slot()
+      .FillWidth(1)
+      [
+        SNew(SSlider)
+        .IndentHandle(false)
+        .Style(SUTStyle::Get(), "UT.Slider")
+        .Value(Delegate, &FConstrainedSliderDelegate::Get)
+        .OnValueChanged(Delegate, &FConstrainedSliderDelegate::Set)
+      ]
     ]
   ];
 }

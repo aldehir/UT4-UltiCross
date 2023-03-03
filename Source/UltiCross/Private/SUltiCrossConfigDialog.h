@@ -33,35 +33,38 @@ class SUltiCrossConfigDialog : public SUTDialogBase
 
 public:
   SUltiCrossConfigDialog()
-  : CrosshairViewModel(new FUltiCrosshairViewModel)
+  : CrosshairViewModel(new FUltiCrosshairViewModel(this))
   {}
 
   void Construct(const FArguments& InArgs);
 
   void GatherCrosshairs();
-  void GatherCrosshairTypes();
   void OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId);
 
   TSharedRef<SComboBox<UUltiCrosshair*>> ConstructCrosshairSelection();
   TSharedRef<SWidget> GenerateCrosshairListWidget(UUltiCrosshair* InItem);
   void OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType);
 
+  TSharedRef<SWidget> GenerateCrosshairTypeListWidget(TSharedPtr<FUltiCrosshairTypeDescriptor> InItem);
+
   SVerticalBox::FSlot& AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate);
 
   TSharedRef<SWidget> ConstructPropertiesPanel();
 
-  virtual bool bRemainOPenThroughTravel()
+  virtual bool bRemainOpenThroughTravel()
   {
     return true;
   }
 
 private:
+  friend class FUltiCrosshairViewModel;
+
   TWeakObjectPtr<class AUTHUD> HUD;
   TSharedRef<FUltiCrosshairViewModel> CrosshairViewModel;
 
-  TArray<UUltiCrosshair*> Crosshairs;
+  TSharedPtr<SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>> CrosshairTypeComboBox;
 
-  TArray<TPair<FText, EUltiCrossCrosshairType>> CrosshairTypes;
+  TArray<UUltiCrosshair*> Crosshairs;
 };
 
 #endif
