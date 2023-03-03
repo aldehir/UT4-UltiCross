@@ -128,10 +128,13 @@ public:
   UPROPERTY(Config)
   FUltiCrossNgonParams Ngon;
 
+  /** Generated Crosshair texture */
+  UPROPERTY(Transient)
+  UTexture2D* Texture;
+
   UFUNCTION()
   void UpdateTexture();
 
-  UTexture2D *GetTexture() { return Texture; }
   TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
   void PostInitProperties() override;
@@ -139,6 +142,4 @@ public:
   /** Draw the crosshair using our own implementation. */
   void DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply) override;
 
-private:
-  UTexture2D* Texture;
 };

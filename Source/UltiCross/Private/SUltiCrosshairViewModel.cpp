@@ -100,7 +100,7 @@ void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
   check(C);
   Crosshair = C;
   CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
-  Brush->SetResourceObject(C->GetTexture());
+  Brush->SetResourceObject(C->Texture);
 
   // Let every delegate know so they can update their cached references
   for (const TPair<FString, TSharedRef<FConstrainedSliderDelegate>>& Pair : Delegates)
