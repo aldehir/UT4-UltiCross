@@ -102,7 +102,6 @@ void FCairoCrosshairRenderer::RenderBackground(FCairoContext& Cairo, FRenderCont
 void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx)
 {
   UUltiCrosshair* Crosshair = Ctx.Crosshair;
-
   if (Crosshair->Type != EUltiCrossCrosshairType::Crosshairs) return;
 
   FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
@@ -110,6 +109,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   float Outline = Crosshair->Outline;
   float Rotation = FMath::Clamp(Crosshair->Rotation, 0.0f, 360.0f);
   float Thickness = Params.Thickness;
+  float CenterGap = Params.CenterGap;
 
   // Do nothing if length = 0
   if (FMath::IsNearlyZero(Params.Length)) return;
@@ -125,17 +125,16 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
 
     // If any angle is a multiple of 90 and thickness == 0.5, then we want to offset
     // the center by 1 in both axes to render a pixel perfect crosshair.
-    bool isOff = FMath::IsNearlyZero(FMath::Fmod(Wrapped, 90.0f)) && FMath::IsNearlyEqual(Thickness, 0.5f);
-
-    if (isOff && !Ctx.bOffCenter)
-    {
-      // Make sure we only compute this once and not again on a second pass
-      Ctx.bOffCenter = true;
-      Ctx.Center = Ctx.Center - 0.5f;
-      Params.CenterGap -= 0.5f;
-    }
+    Ctx.bOffCenter = FMath::IsNearlyZero(FMath::Fmod(Wrapped, 90.0f)) && FMath::IsNearlyEqual(Thickness, 0.5f);
 
     Angles.Add(Wrapped);
+  }
+
+  FVector2D Center = Ctx.Center;
+  if (Ctx.bOffCenter)
+  {
+    Center = Center - 0.5f;
+    CenterGap = CenterGap - 0.5f;
   }
 
   for (const float Angle : Angles)
@@ -143,11 +142,11 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
     Cairo.Save();
 
     // Rotate about the center
-    Cairo.Translate(Ctx.Center);
+    Cairo.Translate(Center);
     Cairo.Rotate(FMath::DegreesToRadians(Angle));
 
     FVector2D OutlineVec(0, Outline);
-    FVector2D StartVec(0, -1 * Params.CenterGap);
+    FVector2D StartVec(0, -1 * CenterGap);
     FVector2D LengthVec(0, Params.Length);
 
     // Use the source operator for both the stroke and fill
@@ -180,6 +179,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
 void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext& Ctx)
 {
   UUltiCrosshair* Crosshair = Ctx.Crosshair;
+  if (Crosshair->Type != EUltiCrossCrosshairType::Circle) return;
 
   float Outline = Crosshair->Outline;
   float Thickness = Crosshair->Circle.Thickness;
@@ -188,14 +188,24 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
   if (FMath::IsNearlyZero(Radius)) return;
 
   // Adjust radius for better pixel alignment
-  if (Ctx.bOffCenter || (!Ctx.bOffCenter && FMath::RoundToInt(Thickness) % 2 == 1))
+  FVector2D Center = Ctx.Center;
+  if (Ctx.bOffCenter)
   {
-    Radius = Radius - 0.5f;
+    Center = Center - 0.5f;
+    if (FMath::RoundToInt(Thickness) % 2 == 0) {
+      Radius = Radius - 0.5f;
+    }
+  }
+  else
+  {
+    if (FMath::RoundToInt(Thickness) % 2 == 1) {
+      Radius = Radius - 0.5f;
+    }
   }
 
   Cairo.Save();
 
-  Cairo.Arc(Ctx.Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
+  Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
   Cairo.ClosePath();
 
   Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);
@@ -217,7 +227,11 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
   Cairo.Restore();
 }
 
-void FCairoCrosshairRenderer::RenderNgon(FCairoContext& Cairo, FRenderContext& Ctx) {}
+void FCairoCrosshairRenderer::RenderNgon(FCairoContext& Cairo, FRenderContext& Ctx)
+{
+  UUltiCrosshair* Crosshair = Ctx.Crosshair;
+  if (Crosshair->Type != EUltiCrossCrosshairType::Circle) return;
+}
 
 void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ctx)
 {
@@ -228,14 +242,16 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
 
   if (FMath::IsNearlyZero(Radius)) return;
 
+  FVector2D Center = Ctx.Center;
   if (Ctx.bOffCenter)
   {
+    Center = Center - 0.5f;
     Radius = Radius - 0.5f;
   }
 
   Cairo.Save();
 
-  Cairo.Arc(Ctx.Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
+  Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
   Cairo.ClosePath();
 
   Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);
