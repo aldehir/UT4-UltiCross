@@ -3,6 +3,7 @@
 #include "UltiCrosshair.h"
 
 #include "SColorPicker.h"
+#include "SWidgetSwitcher.h"
 
 #include "Stubs/SUTStyle.h"
 #include "Stubs/SUWindowsStyle.h"
@@ -171,6 +172,40 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
       +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
       +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Length"))
       +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GetDelegate("Gap"))
+
+      // Crosshair Type Specific Settings
+      +SVerticalBox::Slot()
+      .HAlign(HAlign_Fill)
+      .AutoHeight()
+      [
+        SNew(SWidgetSwitcher)
+        .WidgetIndex(CrosshairViewModel, &FUltiCrosshairViewModel::GetCrosshairTypeDescriptorIndex)
+
+        // These slots must be in the same order as those in FUltiCrosshairViewModel::CrosshairTypes.
+        +SWidgetSwitcher::Slot()
+        [
+          SNew(SVerticalBox)
+
+          +AddSlider(FText::FromString(TEXT("Count")), CrosshairViewModel->GetDelegate("Crosshairs.Count"))
+          +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Crosshairs.Length"))
+          +AddSlider(FText::FromString(TEXT("Center Gap")), CrosshairViewModel->GetDelegate("Crosshairs.CenterGap"))
+        ]
+
+        +SWidgetSwitcher::Slot()
+        [
+          SNew(SCanvas)
+        ]
+
+        +SWidgetSwitcher::Slot()
+        [
+          SNew(SCanvas)
+        ]
+
+        +SWidgetSwitcher::Slot()
+        [
+          SNew(SCanvas)
+        ]
+      ]
 
       // +SVerticalBox::Slot()
       // .AutoHeight()

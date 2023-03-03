@@ -58,6 +58,7 @@ public:
   void OnTypeChanged(TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor, ESelectInfo::Type SelectType);
   TArray<TSharedPtr<FUltiCrosshairTypeDescriptor>>* GetCrosshairTypeDescriptors() { return &CrosshairTypes; }
   TSharedPtr<FUltiCrosshairTypeDescriptor> GetCrosshairTypeDescriptor() const;
+  int32 GetCrosshairTypeDescriptorIndex() const;
 
   TSharedRef<FConstrainedSliderDelegate> GetDelegate(const FString& Path);
 

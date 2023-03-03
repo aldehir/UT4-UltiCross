@@ -66,24 +66,63 @@ void FUltiCrosshairConstraintMap::Add(EUltiCrossCrosshairType Type, TSharedRef<F
   Constraints.Add(Type, Constraint);
 }
 
+#define CONSTRAINTS_START(Path) \
+  do { \
+    TSharedRef<FUltiCrosshairConstraintMap> M = MakeShared<FUltiCrosshairConstraintMap>(); \
+    Constraints.Add(TEXT(Path), M)
+
+#define CONSTRAINT_DEFAULT(Type, ...) M->Default = MakeShared<Type>(__VA_ARGS__)
+#define CONSTRAINT_ADD(CType, Type, ...) M->Add(EUltiCrossCrosshairType::##CType, MakeShared<Type>(__VA_ARGS__))
+#define CONSTRAINTS_END() } while (0)
+
 FUltiCrosshairConstraints::FUltiCrosshairConstraints()
 {
-  // Thickness Constraints
-  TSharedRef<FUltiCrosshairConstraintMap> ThicknessConstraints = MakeShared<FUltiCrosshairConstraintMap>();
-  ThicknessConstraints->Default = MakeShared<FUltiCrosshairDiscreteConstraint>(1.0, 20.0f, 1.0f);
-  ThicknessConstraints->Add(EUltiCrossCrosshairType::Crosshairs, MakeShared<FUltiCrosshairThicknessConstraint>(20.0f));
+  CONSTRAINTS_START("Thickness");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 1.0f, 20.0f, 1.0f);
+  CONSTRAINT_ADD(Crosshairs, FUltiCrosshairThicknessConstraint, 20.0f);
+  CONSTRAINTS_END();
 
-  Constraints.Add(TEXT("Thickness"), ThicknessConstraints);
+  CONSTRAINTS_START("Gap");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 20.0f, 1.0f);
+  CONSTRAINTS_END();
 
-  // Gap Constraints
-  TSharedRef<FUltiCrosshairConstraintMap> GapConstraints = MakeShared<FUltiCrosshairConstraintMap>();
-  GapConstraints->Default = MakeShared<FUltiCrosshairDiscreteConstraint>(0.0, 20.0f, 1.0f);
+  CONSTRAINTS_START("Length");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 40.0f, 1.0f);
+  CONSTRAINTS_END();
 
-  Constraints.Add(TEXT("Gap"), GapConstraints);
+  CONSTRAINTS_START("Crosshairs.Count");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 2.0f, 8.0f, 1.0f);
+  CONSTRAINTS_END();
 
-  // Length Constraints
-  TSharedRef<FUltiCrosshairConstraintMap> LengthConstraints = MakeShared<FUltiCrosshairConstraintMap>();
-  LengthConstraints->Default = MakeShared<FUltiCrosshairDiscreteConstraint>(0.0, 40.0f, 1.0f);
+  CONSTRAINTS_START("Crosshairs.CenterGap");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 40.0f, 1.0f);
+  CONSTRAINTS_END();
 
-  Constraints.Add(TEXT("Length"), LengthConstraints);
+  CONSTRAINTS_START("Crosshairs.Length");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 40.0f, 1.0f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Circle.Radius");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 60.0f, 1.0f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Ngon.Edges");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 3.0f, 8.0f, 1.0f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Ngon.RadiusX");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 60.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Ngon.RadiusY");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 60.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Ngon.OffsetX");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 5.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Ngon.OffsetY");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 5.0f, 0.5f);
+  CONSTRAINTS_END();
 }

@@ -161,6 +161,19 @@ TSharedPtr<FUltiCrosshairTypeDescriptor> FUltiCrosshairViewModel::GetCrosshairTy
   return nullptr;
 }
 
+int32 FUltiCrosshairViewModel::GetCrosshairTypeDescriptorIndex() const
+{
+  for (int32 i = 0; i < CrosshairTypes.Num(); ++i)
+  {
+    if (CrosshairTypes[i]->Type == Crosshair->Type)
+    {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 TSharedRef<FConstrainedSliderDelegate> FUltiCrosshairViewModel::GetDelegate(const FString& Path)
 {
   TSharedRef<FConstrainedSliderDelegate>* Search = Delegates.Find(Path);
