@@ -12,10 +12,6 @@ void UUltiCrosshair::PostInitProperties()
   Super::PostInitProperties();
 
   Texture = UTexture2D::CreateTransient(64, 64);
-  CrosshairIcon.Texture = Texture;
-  CrosshairIcon.UL = Texture->GetSizeX();
-  CrosshairIcon.VL = Texture->GetSizeY();
-
   UpdateTexture();
 }
 
@@ -29,4 +25,17 @@ TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString
 {
   TSharedRef<FUltiCrosshairConstraintMap> Map = FUltiCross::Get()->GetConstraintMapForPath(PropertyPath);
   return Map->Get(Type);
+}
+
+void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply)
+{
+  float HUDCrosshairScale = (TargetHUD == nullptr ? 1.0f : TargetHUD->GetCrosshairScale());
+
+  float Width = Texture->GetSurfaceWidth();
+  float Height = Texture->GetSurfaceHeight();
+
+  float X = (Canvas->SizeX * 0.5f) - FMath::CeilToFloat(Width * 0.5f);
+  float Y = (Canvas->SizeY * 0.5f) - FMath::CeilToFloat(Height * 0.5f);
+
+  Canvas->DrawTile(Texture, X, Y, Width, Height, 0.0f, 0.0f, Width, Height);
 }

@@ -93,35 +93,8 @@ bool FUltiCrossExecHandler::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutpu
         UUltiCrosshair* UltiCrosshair = Cast<UUltiCrosshair>(Pair.Value);
         if (UltiCrosshair)
         {
-          Ar.Logf(TEXT("  %s: Name=%s Thickness=%f Length=%f Gap=%f"),
-            *(UltiCrosshair->CrosshairTag.ToString()), *(UltiCrosshair->CrosshairName.ToString()),
-            UltiCrosshair->Thickness, UltiCrosshair->Length, UltiCrosshair->Gap);
-        }
-      }
-
-      return true;
-    }
-    if (FParse::Command(&Cmd, TEXT("DUMP")))
-    {
-      AUTPlayerController* PlayerController = Cast<AUTPlayerController>(GEngine->GetFirstLocalPlayerController(InWorld));
-      AUTHUD* HUD = PlayerController->MyUTHUD;
-
-      Ar.Log(TEXT("UltiCrosshairs:"));
-
-      for (const TPair<FName, UUTCrosshair*>& Pair : HUD->Crosshairs)
-      {
-        UUltiCrosshair* UltiCrosshair = Cast<UUltiCrosshair>(Pair.Value);
-        if (UltiCrosshair)
-        {
-
-          void* Data = nullptr;
-
-          UNumericProperty* Prop = FindPropertyChecked<UNumericProperty>(UltiCrosshair, TEXT("Crosshairs.CenterGap"), &Data);
-          float Thickness = Prop->GetFloatingPointPropertyValue(Data);
-
-          Ar.Logf(TEXT("  %s: Name=%s Thickness=%f"),
-            *(UltiCrosshair->CrosshairTag.ToString()), *(UltiCrosshair->CrosshairName.ToString()),
-            Thickness);
+          Ar.Logf(TEXT("  %s: Name=%s"),
+            *(UltiCrosshair->CrosshairTag.ToString()), *(UltiCrosshair->CrosshairName.ToString()));
         }
       }
 

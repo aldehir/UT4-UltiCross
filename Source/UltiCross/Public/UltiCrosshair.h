@@ -70,6 +70,23 @@ struct FUltiCrossNgonParams
   float OffsetY;
 };
 
+USTRUCT()
+struct FUltiCrossColors
+{
+  GENERATED_USTRUCT_BODY()
+
+  FUltiCrossColors()
+  : Fill(1.0, 1.0, 1.0, 1.0)
+  , Outline(0.0, 0.0, 0.0, 1.0)
+  {}
+
+  UPROPERTY()
+  FLinearColor Fill;
+
+  UPROPERTY()
+  FLinearColor Outline;
+};
+
 UCLASS(Config = Game, ConfigDoNotCheckDefaults)
 class ULTICROSS_API UUltiCrosshair : public UUTCrosshair
 {
@@ -87,14 +104,6 @@ public:
   UPROPERTY(Config)
   float Thickness;
 
-  /** Gap */
-  UPROPERTY(Config)
-  float Gap;
-
-  /** Length */
-  UPROPERTY(Config)
-  float Length;
-
   /** Outline Thickness */
   UPROPERTY(Config)
   float Outline;
@@ -102,6 +111,10 @@ public:
   /** Rotation */
   UPROPERTY(Config)
   float Rotation;
+
+  /** Colors */
+  UPROPERTY(Config)
+  FUltiCrossColors Color;
 
   /** Parameters for Crosshairs type */
   UPROPERTY(Config)
@@ -122,6 +135,9 @@ public:
   TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
   void PostInitProperties() override;
+
+  /** Draw the crosshair using our own implementation. */
+  void DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply) override;
 
 private:
   UTexture2D* Texture;

@@ -82,12 +82,8 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
   CONSTRAINT_ADD(Crosshairs, FUltiCrosshairThicknessConstraint, 20.0f);
   CONSTRAINTS_END();
 
-  CONSTRAINTS_START("Gap");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 20.0f, 1.0f);
-  CONSTRAINTS_END();
-
-  CONSTRAINTS_START("Length");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 40.0f, 1.0f);
+  CONSTRAINTS_START("Rotation");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 360.0f, 45.0f);
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Crosshairs.Count");

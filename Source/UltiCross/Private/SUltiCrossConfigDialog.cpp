@@ -170,8 +170,7 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
       ]
 
       +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
-      +AddSlider(FText::FromString(TEXT("Length")), CrosshairViewModel->GetDelegate("Length"))
-      +AddSlider(FText::FromString(TEXT("Gap")), CrosshairViewModel->GetDelegate("Gap"))
+      +AddSlider(FText::FromString(TEXT("Rotation")), CrosshairViewModel->GetDelegate("Rotation"))
 
       // Crosshair Type Specific Settings
       +SVerticalBox::Slot()
@@ -207,13 +206,65 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
         ]
       ]
 
-      // +SVerticalBox::Slot()
-      // .AutoHeight()
-      // [
-      //   SNew(SColorPicker)
-      //   .DisplayInlineVersion(true)
-      //   .UseAlpha(true)
-      // ]
+      // Fill Color Picker
+      +SVerticalBox::Slot()
+      .HAlign(HAlign_Fill)
+      .AutoHeight()
+      .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
+      [
+        SNew(SHorizontalBox)
+
+        // Caption
+        +SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+          SNew(STextBlock)
+          .MinDesiredWidth(200)
+          .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+          .Text(FText::FromString(TEXT("Fill Color")))
+        ]
+
+        +SHorizontalBox::Slot()
+        .FillWidth(1)
+        [
+          SNew(SColorPicker)
+          .DisplayInlineVersion(true)
+          .UseAlpha(true)
+          .TargetColorAttribute(CrosshairViewModel, &FUltiCrosshairViewModel::GetFillColor)
+          .OnColorCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::SetFillColor)
+          .PreColorCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::SetFillColor)
+        ]
+      ]
+
+      // Outline Color Picker
+      +SVerticalBox::Slot()
+      .HAlign(HAlign_Fill)
+      .AutoHeight()
+      .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
+      [
+        SNew(SHorizontalBox)
+
+        // Caption
+        +SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+          SNew(STextBlock)
+          .MinDesiredWidth(200)
+          .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+          .Text(FText::FromString(TEXT("Outline Color")))
+        ]
+
+        +SHorizontalBox::Slot()
+        .FillWidth(1)
+        [
+          SNew(SColorPicker)
+          .DisplayInlineVersion(true)
+          .UseAlpha(true)
+          .TargetColorAttribute(CrosshairViewModel, &FUltiCrosshairViewModel::GetOutlineColor)
+          .OnColorCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::SetOutlineColor)
+          .PreColorCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::SetOutlineColor)
+        ]
+      ]
     ];
 }
 

@@ -60,6 +60,12 @@ public:
   TSharedPtr<FUltiCrosshairTypeDescriptor> GetCrosshairTypeDescriptor() const;
   int32 GetCrosshairTypeDescriptorIndex() const;
 
+  FLinearColor GetFillColor() const;
+  void SetFillColor(FLinearColor Color);
+
+  FLinearColor GetOutlineColor() const;
+  void SetOutlineColor(FLinearColor Color);
+
   TSharedRef<FConstrainedSliderDelegate> GetDelegate(const FString& Path);
 
 private:

@@ -161,10 +161,6 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCr
 
   FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
 
-  // TODO: Remove these from UUltiCrosshair
-  Params.CenterGap = Crosshair->Gap;
-  Params.Length = Crosshair->Length;
-
   FVector2D Center(Ctx->SizeX() / 2.0f, Ctx->SizeY() / 2.0f);
 
   // Pre-compute angles
@@ -205,14 +201,14 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCr
     S.MoveTo(StartVec + OutlineVec);
     S.RelativeLineTo((-1 * LengthVec) - (2 * OutlineVec));
     S.SetLineWidth(2.0f * (Outline + Thickness));
-    S.Stroke(FLinearColor::Black);
+    S.Stroke(Crosshair->Color.Outline);
 
     // Draw the fill
     S.MoveTo(StartVec);
     S.RelativeLineTo(-1 * LengthVec);
     S.SetLineWidth(2.0f * Thickness);
     S.SetOperator(ECairoOperator::Source);
-    S.Stroke(FLinearColor::White);
+    S.Stroke(Crosshair->Color.Fill);
   }
 }
 

@@ -174,6 +174,28 @@ int32 FUltiCrosshairViewModel::GetCrosshairTypeDescriptorIndex() const
   return -1;
 }
 
+FLinearColor FUltiCrosshairViewModel::GetFillColor() const
+{
+  return Crosshair->Color.Fill;
+}
+
+void FUltiCrosshairViewModel::SetFillColor(FLinearColor Color)
+{
+  Crosshair->Color.Fill = Color;
+  Crosshair->UpdateTexture();
+}
+
+FLinearColor FUltiCrosshairViewModel::GetOutlineColor() const
+{
+  return Crosshair->Color.Outline;
+}
+
+void FUltiCrosshairViewModel::SetOutlineColor(FLinearColor Color)
+{
+  Crosshair->Color.Outline = Color;
+  Crosshair->UpdateTexture();
+}
+
 TSharedRef<FConstrainedSliderDelegate> FUltiCrosshairViewModel::GetDelegate(const FString& Path)
 {
   TSharedRef<FConstrainedSliderDelegate>* Search = Delegates.Find(Path);
