@@ -6,48 +6,69 @@
 FConstrainedSliderDelegate::FConstrainedSliderDelegate(FUltiCrosshairViewModel* ViewModel, const FString& PropertyPath)
   : ViewModel(ViewModel)
   , PropertyPath(PropertyPath)
+  , CachedConstraint(MakeShared<FUltiCrosshairConstraint>(0.0f, 100.0f))
 {
   check(ViewModel);
+  FMemory::Memzero(CachedInstance);
+  FMemory::Memzero(CachedCDO);
+
+  CacheReferences();
+}
+
+void FConstrainedSliderDelegate::CacheReferences()
+{
+  UUltiCrosshair *Obj = ViewModel->GetCrosshair();
+
+  // Always cache the constraint, for when Type is changed.
+  CachedConstraint = Obj->GetConstraint(PropertyPath);
+
+  // Do nothing if we have the same object
+  if (Obj == CachedInstance.Obj)
+  {
+    return;
+  }
+
+  // Update references to avoid doing this every tick
+  CachedRef& Inst = CachedInstance;
+  CachedRef& CDO = CachedCDO;
+
+  Inst.Obj = Obj;
+  Inst.Prop = FindPropertyChecked<UNumericProperty>(Inst.Obj, PropertyPath, &Inst.PropData);
+
+  CDO.Obj = GetMutableDefault<UUltiCrosshair>(Obj->GetClass());
+  CDO.Prop = FindPropertyChecked<UNumericProperty>(CDO.Obj, PropertyPath, &CDO.PropData);
 }
 
 float FConstrainedSliderDelegate::Get() const
 {
-  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
-  TSharedRef<FUltiCrosshairConstraint> Constraint = Inst->GetConstraint(PropertyPath);
-  return Constraint->Normalize(GetRaw());
+  return CachedConstraint->Normalize(GetRaw());
 }
 
 float FConstrainedSliderDelegate::GetRaw() const
 {
-  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
+  CachedRef Inst = CachedInstance;
 
-  void* Data = nullptr;
-  UNumericProperty* Prop = FindPropertyChecked<UNumericProperty>(Inst, PropertyPath, &Data);
-
-  if (Prop->IsInteger()) {
-    return (float)Prop->GetSignedIntPropertyValue(Data);
+  if (Inst.Prop->IsInteger()) {
+    return (float)Inst.Prop->GetSignedIntPropertyValue(Inst.PropData);
   }
 
-  return Prop->GetFloatingPointPropertyValue(Data);
+  return Inst.Prop->GetFloatingPointPropertyValue(Inst.PropData);
 }
 
 void FConstrainedSliderDelegate::Set(float Value)
 {
-  UUltiCrosshair* Inst = ViewModel->GetCrosshair();
-  TSharedRef<FUltiCrosshairConstraint> Constraint = Inst->GetConstraint(PropertyPath);
+  CachedRef& Inst = CachedInstance;
+  TSharedRef<FUltiCrosshairConstraint> Constraint = CachedConstraint;
 
   Value = Constraint->Denormalize(Value);
 
-  void* Data = nullptr;
-  UNumericProperty* Prop = FindPropertyChecked<UNumericProperty>(Inst, PropertyPath, &Data);
-
-  if (Prop->IsInteger()) {
-    Prop->SetIntPropertyValue(Data, (int64)Value);
+  if (Inst.Prop->IsInteger()) {
+    Inst.Prop->SetIntPropertyValue(Inst.PropData, (int64)Value);
   } else {
-    Prop->SetFloatingPointPropertyValue(Data, Value);
+    Inst.Prop->SetFloatingPointPropertyValue(Inst.PropData, Value);
   }
 
-  Inst->UpdateTexture();
+  Inst.Obj->UpdateTexture();
 }
 
 FText FConstrainedSliderDelegate::Text() const
@@ -73,6 +94,12 @@ void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
   Crosshair = C;
   CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
   Brush->SetResourceObject(C->GetTexture());
+
+  // Let every delegate know so they can update their cached references
+  for (const TPair<FString, TSharedRef<FConstrainedSliderDelegate>>& Pair : Delegates)
+  {
+    Pair.Value->CacheReferences();
+  }
 }
 
 UUltiCrosshair* FUltiCrosshairViewModel::GetCrosshair() const

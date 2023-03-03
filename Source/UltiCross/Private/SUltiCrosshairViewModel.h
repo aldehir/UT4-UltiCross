@@ -12,6 +12,8 @@ class FConstrainedSliderDelegate
 public:
   FConstrainedSliderDelegate(FUltiCrosshairViewModel* ViewModel, const FString& PropertyPath);
 
+  void CacheReferences();
+
   float Get() const;
   float GetRaw() const;
 
@@ -19,8 +21,19 @@ public:
   FText Text() const;
 
 private:
+  struct CachedRef
+  {
+    UUltiCrosshair* Obj;
+    UNumericProperty* Prop;
+    void* PropData;
+  };
+
   FUltiCrosshairViewModel* ViewModel;
   FString PropertyPath;
+
+  CachedRef CachedInstance;
+  CachedRef CachedCDO;
+  TSharedRef<FUltiCrosshairConstraint> CachedConstraint;
 };
 
 /**
