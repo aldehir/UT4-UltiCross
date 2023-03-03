@@ -136,7 +136,10 @@ void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
 
   Ctx.Begin();
   RenderBackground(&Ctx);
-  RenderCrosshairs(&Ctx, Crosshair);
+
+  RenderCrosshairs(&Ctx, Crosshair, RenderStroke);
+  RenderCrosshairs(&Ctx, Crosshair, RenderFill);
+
   RenderCircle(&Ctx, Crosshair);
   RenderNgon(&Ctx, Crosshair);
   RenderDot(&Ctx, Crosshair);
@@ -149,7 +152,7 @@ void FCairoCrosshairRenderer::RenderBackground(FCairoRenderContext *Ctx)
   S.Clear();
 }
 
-void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair)
+void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair, int Render)
 {
   if (Crosshair->Type != EUltiCrossCrosshairType::Crosshairs) return;
 
@@ -197,18 +200,26 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCr
     FVector2D StartVec(0, -1 * Params.CenterGap);
     FVector2D LengthVec(0, Params.Length);
 
+    // Use the source
+
     // Draw the outline stroke first
-    S.MoveTo(StartVec + OutlineVec);
-    S.RelativeLineTo((-1 * LengthVec) - (2 * OutlineVec));
-    S.SetLineWidth(2.0f * (Outline + Thickness));
-    S.Stroke(Crosshair->Color.Outline);
+    if (Render & RenderStroke)
+    {
+      S.MoveTo(StartVec + OutlineVec);
+      S.RelativeLineTo((-1 * LengthVec) - (2 * OutlineVec));
+      S.SetLineWidth(2.0f * (Outline + Thickness));
+      S.Stroke(Crosshair->Color.Outline);
+    }
 
     // Draw the fill
-    S.MoveTo(StartVec);
-    S.RelativeLineTo(-1 * LengthVec);
-    S.SetLineWidth(2.0f * Thickness);
-    S.SetOperator(ECairoOperator::Source);
-    S.Stroke(Crosshair->Color.Fill);
+    if (Render & RenderFill)
+    {
+      S.MoveTo(StartVec);
+      S.RelativeLineTo(-1 * LengthVec);
+      S.SetLineWidth(2.0f * Thickness);
+      S.SetOperator(ECairoOperator::Source);
+      S.Stroke(Crosshair->Color.Fill);
+    }
   }
 }
 

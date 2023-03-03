@@ -23,6 +23,10 @@ enum class ECairoOperator : uint8 {
   Over = CAIRO_OPERATOR_OVER
 };
 
+const int RenderStroke = 0x01;
+const int RenderFill = 0x02;
+const int RenderAll = RenderStroke | RenderFill;
+
 /**
  * Saves and restores the Cairo context within local scope.
  */
@@ -62,7 +66,7 @@ public:
 
 private:
   void RenderBackground(FCairoRenderContext *Ctx);
-  void RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
+  void RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair, int Render = RenderAll);
   void RenderCircle(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
   void RenderNgon(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
   void RenderDot(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
