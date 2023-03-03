@@ -4,157 +4,88 @@
 
 #include "CairoCrosshairRenderer.h"
 
-FCairoRenderContext::FCairoRenderContext(UTexture2D* Tex)
-  : FRenderContext(Tex)
-  , CairoSurface(nullptr)
-  , CairoContext(nullptr)
+FTextureLocker::FTextureLocker(UTexture2D *Texture) : Texture(Texture)
 {
+  check(Texture);
+  BulkData = &Texture->PlatformData->Mips[0].BulkData;
+  Data = (void*)BulkData->Lock(LOCK_READ_WRITE);
 }
 
-void FCairoRenderContext::Begin()
+FTextureLocker::~FTextureLocker()
 {
-  FRenderContext::Begin();
-
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, SizeX());
-  CairoSurface = cairo_image_surface_create_for_data(RawData, CAIRO_FORMAT_ARGB32, SizeX(), SizeY(), stride);
-  CairoContext = cairo_create(CairoSurface);
+  BulkData->Unlock();
+  Texture->UpdateResource();
 }
 
-void FCairoRenderContext::End()
+FCairoSurface::FCairoSurface(void* Data, cairo_format_t Format, int Width, int Height)
 {
-  cairo_destroy(CairoContext);
-  CairoContext = nullptr;
-
-  cairo_surface_destroy(CairoSurface);
-  CairoSurface = nullptr;
-
-  FRenderContext::End();
+  int stride = cairo_format_stride_for_width(Format, Width);
+  Surface = cairo_image_surface_create_for_data((uint8*)Data, Format, Width, Height, stride);
 }
 
-FCairoSession::FCairoSession(FCairoRenderContext *RenderContext)
-  : Ctx(RenderContext)
-{
-  cairo_save(Ctx->CairoContext);
-}
+FCairoSurface::~FCairoSurface() { cairo_surface_destroy(Surface); }
 
-FCairoSession::~FCairoSession()
-{
-  cairo_restore(Ctx->CairoContext);
-}
+FCairoContext::FCairoContext(FCairoSurface& Surface) { Context = cairo_create(Surface.GetSurface()); }
+FCairoContext::~FCairoContext() { cairo_destroy(Context); }
 
-void FCairoSession::Clear()
-{
-  cairo_set_source_rgba(Ctx->CairoContext, 0, 0, 0, 0);
-  cairo_set_operator(Ctx->CairoContext, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(Ctx->CairoContext);
-}
+void FCairoContext::Save() { cairo_save(Context); }
+void FCairoContext::Restore() { cairo_restore(Context); }
 
-void FCairoSession::MoveTo(const FVector2D& Point)
-{
-  cairo_move_to(Ctx->CairoContext, Point.X, Point.Y);
-}
+void FCairoContext::Paint() { cairo_paint(Context); }
 
-void FCairoSession::LineTo(const FVector2D& Point)
-{
-  cairo_line_to(Ctx->CairoContext, Point.X, Point.Y);
-}
+void FCairoContext::MoveTo(const FVector2D& Point) { cairo_move_to(Context, Point.X, Point.Y); }
+void FCairoContext::LineTo(const FVector2D& Point) { cairo_line_to(Context, Point.X, Point.Y); }
+void FCairoContext::RelLineTo(const FVector2D& Vec) { cairo_rel_line_to(Context, Vec.X, Vec.Y); }
+void FCairoContext::ClosePath() { cairo_close_path(Context); }
 
-void FCairoSession::RelativeLineTo(const FVector2D& Vec)
-{
-  cairo_rel_line_to(Ctx->CairoContext, Vec.X, Vec.Y);
-}
+void FCairoContext::Translate(const FVector2D& V) { cairo_translate(Context, V.X, V.Y); }
+void FCairoContext::Rotate(float Angle) { cairo_rotate(Context, Angle); }
 
-void FCairoSession::ClosePath()
-{
-  cairo_close_path(Ctx->CairoContext);
-}
+void FCairoContext::SetSourceRGBA(const FLinearColor& Color) { cairo_set_source_rgba(Context, Color.R, Color.G, Color.B, Color.A); }
+void FCairoContext::SetLineWidth(float Width) { cairo_set_line_width(Context, Width); }
+void FCairoContext::SetOperator(cairo_operator_t Op) { cairo_set_operator(Context, Op); }
 
-void FCairoSession::Translate(const FVector2D& V)
-{
-  cairo_translate(Ctx->CairoContext, V.X, V.Y);
-}
-
-void FCairoSession::Rotate(float Angle)
-{
-  cairo_rotate(Ctx->CairoContext, Angle);
-}
-
-void FCairoSession::RotateAround(const FVector2D& P, float Angle)
-{
-  Translate(P);
-  Rotate(Angle);
-  Translate(-1 * P);
-}
-
-void FCairoSession::SetLineWidth(float Width)
-{
-  cairo_set_line_width(Ctx->CairoContext, Width);
-}
-
-void FCairoSession::SetOperator(ECairoOperator Op)
-{
-  cairo_set_operator(Ctx->CairoContext, (cairo_operator_t)Op);
-}
-
-void FCairoSession::Fill(const FLinearColor& Color, bool bPreserve)
-{
-  cairo_set_source_rgba(Ctx->CairoContext, Color.R, Color.G, Color.B, Color.A);
-
-  if (bPreserve)
-  {
-    cairo_fill_preserve(Ctx->CairoContext);
-  }
-  else
-  {
-    cairo_fill(Ctx->CairoContext);
-  }
-}
-
-void FCairoSession::Stroke(const FLinearColor& Color, bool bPreserve)
-{
-  cairo_set_source_rgba(Ctx->CairoContext, Color.R, Color.G, Color.B, Color.A);
-
-  if (bPreserve)
-  {
-    cairo_stroke_preserve(Ctx->CairoContext);
-  }
-  else
-  {
-    cairo_stroke(Ctx->CairoContext);
-  }
-}
+void FCairoContext::Fill() { cairo_fill(Context); }
+void FCairoContext::Stroke() { cairo_stroke(Context); }
+void FCairoContext::FillPreserve() { cairo_fill_preserve(Context); }
+void FCairoContext::StrokePreserve() { cairo_stroke(Context); }
 
 FCairoCrosshairRenderer::FCairoCrosshairRenderer()
-{
-}
+{}
 
 void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
 {
-  ensure(Crosshair);
+  FTextureLocker Locker(Crosshair->Texture);
 
-  FCairoRenderContext Ctx(Crosshair->Texture);
+  int Width = Crosshair->Texture->GetSurfaceWidth();
+  int Height = Crosshair->Texture->GetSurfaceHeight();
 
-  Ctx.Begin();
-  RenderBackground(&Ctx);
+  FCairoSurface Surface(Locker.GetData(), CAIRO_FORMAT_ARGB32, Width, Height);
+  FCairoContext Ctx(Surface);
 
-  RenderCrosshairs(&Ctx, Crosshair, RenderStroke);
-  RenderCrosshairs(&Ctx, Crosshair, RenderFill);
+  RenderBackground(Ctx);
 
-  RenderCircle(&Ctx, Crosshair);
-  RenderNgon(&Ctx, Crosshair);
-  RenderDot(&Ctx, Crosshair);
-  Ctx.End();
+  RenderCrosshairs(Ctx, Crosshair, RenderStroke);
+  RenderCrosshairs(Ctx, Crosshair, RenderFill);
+
+  RenderCircle(Ctx, Crosshair);
+  RenderNgon(Ctx, Crosshair);
+  RenderDot(Ctx, Crosshair);
 }
 
-void FCairoCrosshairRenderer::RenderBackground(FCairoRenderContext *Ctx)
+void FCairoCrosshairRenderer::RenderBackground(FCairoContext& Ctx)
 {
-  FCairoSession S(Ctx);
-  S.Clear();
+  Ctx.SetSourceRGBA(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f));
+  Ctx.SetOperator(CAIRO_OPERATOR_SOURCE);
+  Ctx.Paint();
 }
 
-void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair, int Render)
+void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Ctx, UUltiCrosshair *Crosshair, int Render)
 {
   if (Crosshair->Type != EUltiCrossCrosshairType::Crosshairs) return;
+
+  int Width = Crosshair->Texture->GetSurfaceWidth();
+  int Height = Crosshair->Texture->GetSurfaceHeight();
 
   bool bOffsetByOne = false;
 
@@ -164,7 +95,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCr
 
   FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
 
-  FVector2D Center(Ctx->SizeX() / 2.0f, Ctx->SizeY() / 2.0f);
+  FVector2D Center(Width * 0.5f, Height * 0.5f);
 
   // Pre-compute angles
   TArray<float> Angles;
@@ -190,39 +121,43 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCr
 
   for (const float Angle : Angles)
   {
-    FCairoSession S(Ctx);
+    Ctx.Save();
 
     // Rotate about the center
-    S.Translate(Center);
-    S.Rotate(FMath::DegreesToRadians(Angle));
+    Ctx.Translate(Center);
+    Ctx.Rotate(FMath::DegreesToRadians(Angle));
 
     FVector2D OutlineVec(0, Outline);
     FVector2D StartVec(0, -1 * Params.CenterGap);
     FVector2D LengthVec(0, Params.Length);
 
-    // Use the source
+    // Use the source operator for both the stroke and fill
+    Ctx.SetOperator(CAIRO_OPERATOR_SOURCE);
 
     // Draw the outline stroke first
     if (Render & RenderStroke)
     {
-      S.MoveTo(StartVec + OutlineVec);
-      S.RelativeLineTo((-1 * LengthVec) - (2 * OutlineVec));
-      S.SetLineWidth(2.0f * (Outline + Thickness));
-      S.Stroke(Crosshair->Color.Outline);
+      Ctx.MoveTo(StartVec + OutlineVec);
+      Ctx.RelLineTo((-1 * LengthVec) - (2 * OutlineVec));
+      Ctx.SetLineWidth(2.0f * (Outline + Thickness));
+      Ctx.SetSourceRGBA(Crosshair->Color.Outline);
+      Ctx.Stroke();
     }
 
     // Draw the fill
     if (Render & RenderFill)
     {
-      S.MoveTo(StartVec);
-      S.RelativeLineTo(-1 * LengthVec);
-      S.SetLineWidth(2.0f * Thickness);
-      S.SetOperator(ECairoOperator::Source);
-      S.Stroke(Crosshair->Color.Fill);
+      Ctx.MoveTo(StartVec);
+      Ctx.RelLineTo(-1 * LengthVec);
+      Ctx.SetLineWidth(2.0f * Thickness);
+      Ctx.SetSourceRGBA(Crosshair->Color.Fill);
+      Ctx.Stroke();
     }
+
+    Ctx.Restore();
   }
 }
 
-void FCairoCrosshairRenderer::RenderCircle(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}
-void FCairoCrosshairRenderer::RenderNgon(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}
-void FCairoCrosshairRenderer::RenderDot(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair) {}
+void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Ctx, UUltiCrosshair *Crosshair) {}
+void FCairoCrosshairRenderer::RenderNgon(FCairoContext& Ctx, UUltiCrosshair *Crosshair) {}
+void FCairoCrosshairRenderer::RenderDot(FCairoContext& Ctx, UUltiCrosshair *Crosshair) {}

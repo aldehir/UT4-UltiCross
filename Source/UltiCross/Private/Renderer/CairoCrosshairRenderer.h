@@ -6,56 +6,67 @@
 
 class UUltiCrosshair;
 
-class FCairoRenderContext : public FRenderContext
+class FTextureLocker
 {
 public:
-  FCairoRenderContext(UTexture2D* Tex);
+  FTextureLocker(UTexture2D* Texture);
+  ~FTextureLocker();
 
-  void Begin() override;
-  void End() override;
+  void* GetData() { return Data; }
 
-  cairo_surface_t* CairoSurface;
-  cairo_t* CairoContext;
+private:
+  UTexture2D* Texture;
+  FByteBulkData* BulkData;
+  void* Data;
 };
 
-enum class ECairoOperator : uint8 {
-  Source = CAIRO_OPERATOR_SOURCE,
-  Over = CAIRO_OPERATOR_OVER
+class FCairoSurface
+{
+public:
+  FCairoSurface(void* Data, cairo_format_t Format, int Width, int Height);
+  ~FCairoSurface();
+
+  cairo_surface_t* GetSurface() { return Surface; }
+
+private:
+  cairo_surface_t* Surface;
+};
+
+class FCairoContext
+{
+public:
+  FCairoContext(FCairoSurface& Surface);
+  ~FCairoContext();
+
+  void Save();
+  void Restore();
+
+  void Paint();
+
+  void MoveTo(const FVector2D& Point);
+  void LineTo(const FVector2D& Point);
+  void RelLineTo(const FVector2D& Vec);
+  void ClosePath();
+
+  void Translate(const FVector2D& V);
+  void Rotate(float Angle);
+
+  void SetSourceRGBA(const FLinearColor& Color);
+  void SetLineWidth(float Width);
+  void SetOperator(cairo_operator_t Op);
+
+  void Fill();
+  void Stroke();
+  void FillPreserve();
+  void StrokePreserve();
+
+private:
+  cairo_t* Context;
 };
 
 const int RenderStroke = 0x01;
 const int RenderFill = 0x02;
 const int RenderAll = RenderStroke | RenderFill;
-
-/**
- * Saves and restores the Cairo context within local scope.
- */
-class FCairoSession
-{
-public:
-  FCairoSession(FCairoRenderContext *Ctx);
-  ~FCairoSession();
-
-  void Clear();
-
-  void MoveTo(const FVector2D& Point);
-  void LineTo(const FVector2D& Point);
-  void RelativeLineTo(const FVector2D& Vec);
-  void ClosePath();
-
-  void Translate(const FVector2D& V);
-  void Rotate(float Angle);
-  void RotateAround(const FVector2D& P, float Angle);
-
-  void SetLineWidth(float Width);
-  void SetOperator(ECairoOperator Op);
-
-  void Fill(const FLinearColor& Color, bool bPreserve = false);
-  void Stroke(const FLinearColor& Color, bool bPreserve = false);
-
-protected:
-  FCairoRenderContext* Ctx;
-};
 
 class FCairoCrosshairRenderer
 {
@@ -65,9 +76,9 @@ public:
   void Render(UUltiCrosshair *Crosshair);
 
 private:
-  void RenderBackground(FCairoRenderContext *Ctx);
-  void RenderCrosshairs(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair, int Render = RenderAll);
-  void RenderCircle(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
-  void RenderNgon(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
-  void RenderDot(FCairoRenderContext *Ctx, UUltiCrosshair *Crosshair);
+  void RenderBackground(FCairoContext& Ctx);
+  void RenderCrosshairs(FCairoContext& Ctx, UUltiCrosshair *Crosshair, int Render = RenderAll);
+  void RenderCircle(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
+  void RenderNgon(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
+  void RenderDot(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
 };
