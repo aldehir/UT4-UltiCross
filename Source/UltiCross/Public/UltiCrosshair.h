@@ -112,6 +112,10 @@ public:
   UPROPERTY(Config)
   float Rotation;
 
+  /** Dot Radius */
+  UPROPERTY(Config)
+  float DotRadius;
+
   /** Colors */
   UPROPERTY(Config)
   FUltiCrossColors Color;

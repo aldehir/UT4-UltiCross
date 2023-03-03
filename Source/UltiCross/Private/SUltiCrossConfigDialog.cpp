@@ -170,7 +170,6 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
       ]
 
       +AddSlider(FText::FromString(TEXT("Thickness")), CrosshairViewModel->GetDelegate("Thickness"))
-      +AddSlider(FText::FromString(TEXT("Rotation")), CrosshairViewModel->GetDelegate("Rotation"))
 
       // Crosshair Type Specific Settings
       +SVerticalBox::Slot()
@@ -205,6 +204,10 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
           SNew(SCanvas)
         ]
       ]
+
+      +AddSlider(FText::FromString(TEXT("Rotation")), CrosshairViewModel->GetDelegate("Rotation"))
+      +AddSlider(FText::FromString(TEXT("Outline")), CrosshairViewModel->GetDelegate("Outline"))
+      +AddSlider(FText::FromString(TEXT("Dot Radius")), CrosshairViewModel->GetDelegate("DotRadius"))
 
       // Fill Color Picker
       +SVerticalBox::Slot()

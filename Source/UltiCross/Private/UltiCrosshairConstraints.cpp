@@ -86,6 +86,14 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
   CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 360.0f, 45.0f);
   CONSTRAINTS_END();
 
+  CONSTRAINTS_START("Outline");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 10.0f, 1.0f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("DotRadius");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 40.0f, 1.0f);
+  CONSTRAINTS_END();
+
   CONSTRAINTS_START("Crosshairs.Count");
   CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 2.0f, 8.0f, 1.0f);
   CONSTRAINTS_END();

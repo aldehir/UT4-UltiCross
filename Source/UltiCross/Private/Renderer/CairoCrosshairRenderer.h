@@ -44,6 +44,7 @@ public:
   void MoveTo(const FVector2D& Point);
   void LineTo(const FVector2D& Point);
   void RelLineTo(const FVector2D& Vec);
+  void Arc(const FVector2D& Center, float Radius, float StartAngle, float EndAngle);
   void ClosePath();
 
   void Translate(const FVector2D& V);
@@ -73,6 +74,7 @@ struct FRenderContext
   int Width;
   int Height;
   bool bOffByOne;
+  int Render;
 };
 
 class FCairoCrosshairRenderer
@@ -84,7 +86,7 @@ public:
 
 private:
   void RenderBackground(FCairoContext& Cairo, FRenderContext& Ctx);
-  void RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx, int Render = RenderAll);
+  void RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx);
   void RenderCircle(FCairoContext& Cairo, FRenderContext& Ctx);
   void RenderNgon(FCairoContext& Cairo, FRenderContext& Ctx);
   void RenderDot(FCairoContext& Cairo, FRenderContext& Ctx);

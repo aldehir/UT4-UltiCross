@@ -36,6 +36,10 @@ void FCairoContext::Paint() { cairo_paint(Context); }
 void FCairoContext::MoveTo(const FVector2D& Point) { cairo_move_to(Context, Point.X, Point.Y); }
 void FCairoContext::LineTo(const FVector2D& Point) { cairo_line_to(Context, Point.X, Point.Y); }
 void FCairoContext::RelLineTo(const FVector2D& Vec) { cairo_rel_line_to(Context, Vec.X, Vec.Y); }
+void FCairoContext::Arc(const FVector2D& Center, float Radius, float StartAngle, float EndAngle)
+{
+  cairo_arc(Context, Center.X, Center.Y, Radius, StartAngle, EndAngle);
+}
 void FCairoContext::ClosePath() { cairo_close_path(Context); }
 
 void FCairoContext::Translate(const FVector2D& V) { cairo_translate(Context, V.X, V.Y); }
@@ -70,12 +74,18 @@ void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
   Ctx.Width = Width;
   Ctx.Height = Height;
   Ctx.bOffByOne = false;
+  Ctx.Render = RenderAll;
 
   RenderBackground(Cairo, Ctx);
 
-  RenderCrosshairs(Cairo, Ctx, RenderStroke);
-  RenderCrosshairs(Cairo, Ctx, RenderFill);
+  Ctx.Render = RenderStroke;
+  RenderCrosshairs(Cairo, Ctx);
+  RenderCircle(Cairo, Ctx);
+  RenderNgon(Cairo, Ctx);
+  RenderDot(Cairo, Ctx);
 
+  Ctx.Render = RenderFill;
+  RenderCrosshairs(Cairo, Ctx);
   RenderCircle(Cairo, Ctx);
   RenderNgon(Cairo, Ctx);
   RenderDot(Cairo, Ctx);
@@ -88,7 +98,7 @@ void FCairoCrosshairRenderer::RenderBackground(FCairoContext& Cairo, FRenderCont
   Cairo.Paint();
 }
 
-void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx, int Render)
+void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx)
 {
   UUltiCrosshair* Crosshair = Ctx.Crosshair;
 
@@ -99,6 +109,9 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   float Rotation = FMath::Clamp(Crosshair->Rotation, 0.0f, 360.0f);
 
   FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
+
+  // Do nothing if length = 0
+  if (FMath::IsNearlyZero(Params.Length)) return;
 
   FVector2D Center(Ctx.Width * 0.5f, Ctx.Height * 0.5f);
 
@@ -140,7 +153,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
     Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);
 
     // Draw the outline stroke first
-    if (Render & RenderStroke)
+    if (Ctx.Render & RenderStroke)
     {
       Cairo.MoveTo(StartVec + OutlineVec);
       Cairo.RelLineTo((-1 * LengthVec) - (2 * OutlineVec));
@@ -150,7 +163,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
     }
 
     // Draw the fill
-    if (Render & RenderFill)
+    if (Ctx.Render & RenderFill)
     {
       Cairo.MoveTo(StartVec);
       Cairo.RelLineTo(-1 * LengthVec);
@@ -168,5 +181,41 @@ void FCairoCrosshairRenderer::RenderNgon(FCairoContext& Cairo, FRenderContext& C
 
 void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ctx)
 {
+  UUltiCrosshair* Crosshair = Ctx.Crosshair;
 
+  float Outline = Crosshair->Outline;
+  float Radius = Crosshair->DotRadius;
+
+  if (FMath::IsNearlyZero(Radius)) return;
+
+  FVector2D Center(Ctx.Width * 0.5f, Ctx.Height * 0.5f);
+
+  // Adjust to maintain a good look if rendering 1px thin crosshairs
+  if (Ctx.bOffByOne)
+  {
+    Radius = Radius - 0.5f;
+    Center = Center - 0.5f;
+  }
+
+  Cairo.Save();
+
+  Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
+  Cairo.ClosePath();
+
+  Cairo.SetOperator(CAIRO_OPERATOR_SOURCE);
+
+  if (Ctx.Render & RenderStroke && !FMath::IsNearlyZero(Outline))
+  {
+    Cairo.SetLineWidth(2.0f * Outline);
+    Cairo.SetSourceRGBA(Crosshair->Color.Outline);
+    Cairo.StrokePreserve();
+  }
+
+  if (Ctx.Render & RenderFill)
+  {
+    Cairo.SetSourceRGBA(Crosshair->Color.Fill);
+    Cairo.Fill();
+  }
+
+  Cairo.Restore();
 }
