@@ -10,34 +10,25 @@ FConstrainedSliderDelegate::FConstrainedSliderDelegate(FUltiCrosshairViewModel* 
   , CachedConstraint(MakeShared<FUltiCrosshairConstraint>(0.0f, 100.0f))
 {
   check(ViewModel);
-  FMemory::Memzero(CachedInstance);
-  FMemory::Memzero(CachedCDO);
-
   CacheReferences();
 }
 
 void FConstrainedSliderDelegate::CacheReferences()
 {
-  UUltiCrosshair *Obj = ViewModel->GetCrosshair();
+  UUltiCrosshair *Crosshair = ViewModel->GetCrosshair();
 
   // Always cache the constraint, for when Type is changed.
-  CachedConstraint = Obj->GetConstraint(PropertyPath);
+  CachedConstraint = Crosshair->GetConstraint(PropertyPath);
 
   // Do nothing if we have the same object
-  if (Obj == CachedInstance.Obj)
+  if (Crosshair == Obj)
   {
     return;
   }
 
   // Update references to avoid doing this every tick
-  CachedRef& Inst = CachedInstance;
-  CachedRef& CDO = CachedCDO;
-
-  Inst.Obj = Obj;
-  Inst.Prop = FindPropertyChecked<UNumericProperty>(Inst.Obj, PropertyPath, &Inst.PropData);
-
-  CDO.Obj = GetMutableDefault<UUltiCrosshair>(Obj->GetClass());
-  CDO.Prop = FindPropertyChecked<UNumericProperty>(CDO.Obj, PropertyPath, &CDO.PropData);
+  Obj = Crosshair;
+  Prop = FindPropertyChecked<UNumericProperty>(Obj, PropertyPath, &PropData);
 }
 
 float FConstrainedSliderDelegate::Get() const
@@ -47,29 +38,26 @@ float FConstrainedSliderDelegate::Get() const
 
 float FConstrainedSliderDelegate::GetRaw() const
 {
-  CachedRef Inst = CachedInstance;
-
-  if (Inst.Prop->IsInteger()) {
-    return (float)Inst.Prop->GetSignedIntPropertyValue(Inst.PropData);
+  if (Prop->IsInteger()) {
+    return (float)Prop->GetSignedIntPropertyValue(PropData);
   }
 
-  return Inst.Prop->GetFloatingPointPropertyValue(Inst.PropData);
+  return Prop->GetFloatingPointPropertyValue(PropData);
 }
 
 void FConstrainedSliderDelegate::Set(float Value)
 {
-  CachedRef& Inst = CachedInstance;
   TSharedRef<FUltiCrosshairConstraint> Constraint = CachedConstraint;
 
   Value = Constraint->Denormalize(Value);
 
-  if (Inst.Prop->IsInteger()) {
-    Inst.Prop->SetIntPropertyValue(Inst.PropData, (int64)Value);
+  if (Prop->IsInteger()) {
+    Prop->SetIntPropertyValue(PropData, (int64)Value);
   } else {
-    Inst.Prop->SetFloatingPointPropertyValue(Inst.PropData, Value);
+    Prop->SetFloatingPointPropertyValue(PropData, Value);
   }
 
-  Inst.Obj->UpdateTexture();
+  Obj->UpdateTexture();
 }
 
 FText FConstrainedSliderDelegate::Text() const
@@ -80,7 +68,6 @@ FText FConstrainedSliderDelegate::Text() const
 FUltiCrosshairViewModel::FUltiCrosshairViewModel(SUltiCrossConfigDialog * View)
   : View(View)
   , Crosshair(nullptr)
-  , CrosshairCDO(nullptr)
   , Brush(new FSlateBrush())
 {
   // Populate Crosshair Types
@@ -99,7 +86,6 @@ void FUltiCrosshairViewModel::SetCrosshair(UUltiCrosshair* C)
 {
   check(C);
   Crosshair = C;
-  CrosshairCDO = GetMutableDefault<UUltiCrosshair>(C->GetClass());
   Brush->SetResourceObject(C->Texture);
 
   // Let every delegate know so they can update their cached references
@@ -144,7 +130,7 @@ FText FUltiCrosshairViewModel::GetTypeText() const
 
 void FUltiCrosshairViewModel::OnTypeChanged(TSharedPtr<FUltiCrosshairTypeDescriptor> Descriptor, ESelectInfo::Type SelectType)
 {
-  Crosshair->Type = CrosshairCDO->Type = Descriptor->Type;
+  Crosshair->Type = Descriptor->Type;
 
   // A change in type may have triggered other constraints
   for (const TPair<FString, TSharedRef<FConstrainedSliderDelegate>>& Pair : Delegates)

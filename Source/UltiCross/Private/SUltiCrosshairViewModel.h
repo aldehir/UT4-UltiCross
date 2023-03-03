@@ -24,18 +24,12 @@ public:
   FText Text() const;
 
 private:
-  struct CachedRef
-  {
-    UUltiCrosshair* Obj;
-    UNumericProperty* Prop;
-    void* PropData;
-  };
-
   FUltiCrosshairViewModel* ViewModel;
   FString PropertyPath;
 
-  CachedRef CachedInstance;
-  CachedRef CachedCDO;
+  UUltiCrosshair* Obj;
+  UNumericProperty* Prop;
+  void* PropData;
   TSharedRef<FUltiCrosshairConstraint> CachedConstraint;
 };
 
@@ -72,7 +66,6 @@ private:
   SUltiCrossConfigDialog* View;
 
   UUltiCrosshair* Crosshair;
-  UUltiCrosshair* CrosshairCDO;
   FSlateBrush* Brush;
 
   TArray<TSharedPtr<FUltiCrosshairTypeDescriptor>> CrosshairTypes;
