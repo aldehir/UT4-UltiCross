@@ -132,7 +132,7 @@ void FCairoCrosshairRenderer::Render(UUltiCrosshair *Crosshair)
 {
   ensure(Crosshair);
 
-  FCairoRenderContext Ctx(Crosshair->GetTexture());
+  FCairoRenderContext Ctx(Crosshair->Texture);
 
   Ctx.Begin();
   RenderBackground(&Ctx);
