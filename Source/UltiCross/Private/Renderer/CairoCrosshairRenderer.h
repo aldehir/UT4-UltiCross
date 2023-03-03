@@ -1,7 +1,5 @@
 #pragma once
 
-#include "RenderContext.h"
-
 #include "cairo/cairo.h"
 
 class UUltiCrosshair;
@@ -68,6 +66,15 @@ const int RenderStroke = 0x01;
 const int RenderFill = 0x02;
 const int RenderAll = RenderStroke | RenderFill;
 
+struct FRenderContext
+{
+  UUltiCrosshair* Crosshair;
+
+  int Width;
+  int Height;
+  bool bOffByOne;
+};
+
 class FCairoCrosshairRenderer
 {
 public:
@@ -76,9 +83,9 @@ public:
   void Render(UUltiCrosshair *Crosshair);
 
 private:
-  void RenderBackground(FCairoContext& Ctx);
-  void RenderCrosshairs(FCairoContext& Ctx, UUltiCrosshair *Crosshair, int Render = RenderAll);
-  void RenderCircle(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
-  void RenderNgon(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
-  void RenderDot(FCairoContext& Ctx, UUltiCrosshair *Crosshair);
+  void RenderBackground(FCairoContext& Cairo, FRenderContext& Ctx);
+  void RenderCrosshairs(FCairoContext& Cairo, FRenderContext& Ctx, int Render = RenderAll);
+  void RenderCircle(FCairoContext& Cairo, FRenderContext& Ctx);
+  void RenderNgon(FCairoContext& Cairo, FRenderContext& Ctx);
+  void RenderDot(FCairoContext& Cairo, FRenderContext& Ctx);
 };
