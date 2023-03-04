@@ -2,7 +2,7 @@
 
 #include "UnrealTournament.h"
 #include "SlateBasics.h"
-#include "SUltiCrosshairViewModel.h"
+#include "UltiCrosshairViewModel.h"
 
 #if !UE_SERVER
 

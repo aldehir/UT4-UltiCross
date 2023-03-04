@@ -1,6 +1,6 @@
 #include "UltiCrossPCH.h"
 #include "SUltiCrossConfigDialog.h"
-#include "SUltiCrosshairViewModel.h"
+#include "UltiCrosshairViewModel.h"
 #include "FindProperty.h"
 
 FConstrainedSliderDelegate::FConstrainedSliderDelegate(FUltiCrosshairViewModel* ViewModel, const FString& PropertyPath)
