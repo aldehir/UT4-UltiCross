@@ -35,6 +35,29 @@ void FUltiCross::ShutdownModule()
   delete ExecHandler;
 }
 
+void FUltiCross::GetUltiCrosshairs(UObject* Outer, TArray<UUltiCrosshair*>& Crosshairs)
+{
+  FName NAME_GeneratedClass(TEXT("GeneratedClass"));
+
+  // Load all Blueprint crosshairs that inherit UUlitCrosshair
+  Crosshairs.Empty();
+  TArray<FAssetData> AssetList;
+  GetAllBlueprintAssetData(UUltiCrosshair::StaticClass(), AssetList);
+
+  for (const FAssetData& Asset : AssetList)
+  {
+    const FString* ClassPath = Asset.TagsAndValues.Find(NAME_GeneratedClass);
+    UClass* CrosshairClass = LoadObject<UClass>(NULL, **ClassPath);
+    if (CrosshairClass == nullptr) continue;
+
+    UUltiCrosshair* Crosshair = NewObject<UUltiCrosshair>(Outer, CrosshairClass, NAME_None, RF_NoFlags);
+    if (Crosshair)
+    {
+      Crosshairs.Add(Crosshair);
+    }
+  }
+}
+
 TSharedPtr<FUltiCrosshairConstraints> FUltiCross::GetConstraints()
 {
   return Constraints;

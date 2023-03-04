@@ -1,4 +1,5 @@
 #include "UltiCrossPCH.h"
+#include "UltiCross.h"
 #include "SUltiCrossConfigDialog.h"
 #include "UltiCrosshair.h"
 
@@ -302,25 +303,8 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget(TSha
 
 void SUltiCrossConfigDialog::GatherCrosshairs()
 {
-  FName NAME_GeneratedClass(TEXT("GeneratedClass"));
-
-  // Load all Blueprint crosshairs that inherit UUlitCrosshair
   Crosshairs.Empty();
-  TArray<FAssetData> AssetList;
-  GetAllBlueprintAssetData(UUltiCrosshair::StaticClass(), AssetList);
-
-  for (const FAssetData& Asset : AssetList)
-  {
-    const FString* ClassPath = Asset.TagsAndValues.Find(NAME_GeneratedClass);
-    UClass* CrosshairClass = LoadObject<UClass>(NULL, **ClassPath);
-    if (CrosshairClass == nullptr) continue;
-
-    UUltiCrosshair* Crosshair = NewObject<UUltiCrosshair>(GetPlayerOwner().Get(), CrosshairClass, NAME_None, RF_NoFlags);
-    if (Crosshair)
-    {
-      Crosshairs.Add(Crosshair);
-    }
-  }
+  FUltiCross::Get()->GetUltiCrosshairs(GetPlayerOwner().Get(), Crosshairs);
 
   if (Crosshairs.Num() > 0)
   {
