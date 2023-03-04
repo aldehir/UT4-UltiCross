@@ -17,7 +17,6 @@ class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
   , _DialogPosition(FVector2D(0.5f, 0.5f))
   , _DialogAnchorPoint(FVector2D(0.5f, 0.5f))
   , _ContentPadding(FVector2D(10.0f, 5.0f))
-  , _ButtonMask(UTDIALOG_BUTTON_OK)
   {}
   SLATE_ARGUMENT(TWeakObjectPtr<class UUTLocalPlayer>, PlayerOwner)
   SLATE_ARGUMENT(TWeakObjectPtr<class AUTPlayerController>, PlayerController)
@@ -27,7 +26,6 @@ class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
   SLATE_ARGUMENT(FVector2D, DialogPosition)
   SLATE_ARGUMENT(FVector2D, DialogAnchorPoint)
   SLATE_ARGUMENT(FVector2D, ContentPadding)
-  SLATE_ARGUMENT(uint16, ButtonMask)
   SLATE_EVENT(FDialogResultDelegate, OnDialogResult)
   SLATE_END_ARGS()
 
@@ -38,6 +36,8 @@ public:
 
   void Construct(const FArguments& InArgs);
   void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+  TSharedRef<SWidget> BuildCustomButtonBar() override;
 
   void GatherCrosshairs();
   void OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId);

@@ -23,7 +23,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
     .DialogAnchorPoint(InArgs._DialogAnchorPoint)
     .IsScrollable(false)
     .ContentPadding(InArgs._ContentPadding)
-    .ButtonMask(UTDIALOG_BUTTON_CLOSE)
+    .ButtonMask(UTDIALOG_BUTTON_APPLY)
     .OnDialogResult(this, &SUltiCrossConfigDialog::OnDialogResult)
   );
 
@@ -272,6 +272,20 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
     ];
 }
 
+TSharedRef<SWidget> SUltiCrossConfigDialog::BuildCustomButtonBar()
+{
+  TSharedPtr<SUniformGridPanel> LeftButtonBar;
+  SAssignNew(LeftButtonBar, SUniformGridPanel)
+    .SlotPadding(FMargin(0.0f, 0.0f, 10.0f, 10.0f));
+
+  uint32 ButtonCount = 0;
+
+  // Add Close button to the left of the dialog.
+  BuildButton(LeftButtonBar, NSLOCTEXT("SUTDialogBase", "CloseButton", "CLOSE"), UTDIALOG_BUTTON_CLOSE, ButtonCount);
+
+  return LeftButtonBar.ToSharedRef();
+}
+
 void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType)
 {
   CrosshairViewModel->SetCrosshair(NewSelection);
@@ -369,6 +383,11 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
 
 void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId)
 {
+  if (ButtonId != UTDIALOG_BUTTON_APPLY)
+  {
+    return;
+  }
+
   AUTHUD *HUD = nullptr;
 
   if (PlayerController.IsValid())
