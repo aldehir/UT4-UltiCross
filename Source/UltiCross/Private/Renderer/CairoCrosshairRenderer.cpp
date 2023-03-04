@@ -1,7 +1,5 @@
 #include "../UltiCrossPCH.h"
 
-#include "UltiCrosshair.h"
-
 #include "CairoCrosshairRenderer.h"
 
 FTextureLocker::FTextureLocker(UTexture2D *Texture) : Texture(Texture)

@@ -1,7 +1,5 @@
 #include "UltiCrossPCH.h"
-#include "UltiCross.h"
 #include "SUltiCrossConfigDialog.h"
-#include "UltiCrosshair.h"
 
 #include "SColorPicker.h"
 #include "SWidgetSwitcher.h"

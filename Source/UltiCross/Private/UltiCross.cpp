@@ -1,9 +1,6 @@
 #include "UltiCrossPCH.h"
 #include "UltiCross.h"
-
-#include "UltiCrosshair.h"
 #include "SUltiCrossConfigDialog.h"
-
 #include "FindProperty.h"
 
 FUltiCross* FUltiCross::Instance = nullptr;
