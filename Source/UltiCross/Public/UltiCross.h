@@ -35,4 +35,10 @@ public:
   FUltiCrossExecHandler();
 
   bool Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar);
+
+  void OnSelectionChanged(FName Selection) { LastSelected = Selection; }
+
+private:
+  /** Last selected crosshair. */
+  FName LastSelected;
 };

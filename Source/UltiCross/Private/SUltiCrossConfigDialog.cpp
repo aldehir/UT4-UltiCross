@@ -13,6 +13,7 @@
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
   PlayerController = InArgs._PlayerController;
+  OnSelectionChanged = InArgs._OnSelectionChanged;
 
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
     .PlayerOwner(InArgs._PlayerOwner)
@@ -28,7 +29,21 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
   );
 
   GatherCrosshairs();
-  
+
+  if (Crosshairs.Num() > 0)
+  {
+    CrosshairViewModel->SetCrosshair(Crosshairs[0]);
+  }
+
+  for (UUltiCrosshair* Crosshair : Crosshairs)
+  {
+    if (Crosshair->CrosshairTag.Compare(InArgs._InitiallySelected) == 0)
+    {
+      CrosshairViewModel->SetCrosshair(Crosshair);
+      break;
+    }
+  }
+
   if (DialogContent.IsValid())
   {
     DialogContent->AddSlot()
@@ -289,6 +304,7 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::BuildCustomButtonBar()
 void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ESelectInfo::Type SelectType)
 {
   CrosshairViewModel->SetCrosshair(NewSelection);
+  OnSelectionChanged.ExecuteIfBound(NewSelection->CrosshairTag);
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
@@ -317,11 +333,6 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
 {
   Crosshairs.Empty();
   FUltiCross::Get()->GetUltiCrosshairs(GetPlayerOwner().Get(), Crosshairs);
-
-  if (Crosshairs.Num() > 0)
-  {
-    CrosshairViewModel->SetCrosshair(Crosshairs[0]);
-  }
 }
 
 void SUltiCrossConfigDialog::AddReferencedObjects(FReferenceCollector& Collector)

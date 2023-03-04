@@ -6,6 +6,8 @@
 
 #if !UE_SERVER
 
+DECLARE_DELEGATE_OneParam(FUltiCrossConfigSelectionChangedDelegate, FName);
+
 class UUltiCrosshair;
 
 class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
@@ -26,7 +28,9 @@ class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
   SLATE_ARGUMENT(FVector2D, DialogPosition)
   SLATE_ARGUMENT(FVector2D, DialogAnchorPoint)
   SLATE_ARGUMENT(FVector2D, ContentPadding)
+  SLATE_ARGUMENT(FName, InitiallySelected)
   SLATE_EVENT(FDialogResultDelegate, OnDialogResult)
+  SLATE_EVENT(FUltiCrossConfigSelectionChangedDelegate, OnSelectionChanged)
   SLATE_END_ARGS()
 
 public:
@@ -67,6 +71,8 @@ private:
   TSharedPtr<SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>> CrosshairTypeComboBox;
 
   TArray<UUltiCrosshair*> Crosshairs;
+
+  FUltiCrossConfigSelectionChangedDelegate OnSelectionChanged;
 };
 
 #endif

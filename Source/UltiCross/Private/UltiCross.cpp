@@ -79,7 +79,9 @@ bool FUltiCrossExecHandler::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutpu
 
     TSharedRef<class SUTDialogBase> Dialog = SNew(SUltiCrossConfigDialog)
       .PlayerOwner(Player)
-      .PlayerController(PlayerController);
+      .PlayerController(PlayerController)
+      .InitiallySelected(LastSelected)
+      .OnSelectionChanged_Raw(this, &FUltiCrossExecHandler::OnSelectionChanged);
 
     Player->OpenDialog(Dialog);
 
