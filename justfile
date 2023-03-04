@@ -2,7 +2,7 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 BuildBat := "../../../Engine/Build/BatchFiles/Build.bat"
 Platform := "Win64"
-Version := "1.0-alpha.1"
+Version := "1.0-alpha.2"
 
 build:
   & {{ BuildBat }} UnrealTournamentEditor {{ Platform }} Debug -waitmutex
