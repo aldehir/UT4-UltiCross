@@ -19,7 +19,7 @@ class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
   , _ContentPadding(FVector2D(10.0f, 5.0f))
   {}
   SLATE_ARGUMENT(TWeakObjectPtr<class UUTLocalPlayer>, PlayerOwner)
-  SLATE_ARGUMENT(TWeakObjectPtr<class AUTPlayerController>, PlayerController)
+  SLATE_ARGUMENT(TWeakObjectPtr<class AUTBasePlayerController>, PlayerController)
   SLATE_ARGUMENT(FText, DialogTitle)
   SLATE_ARGUMENT(FVector2D, DialogSize)
   SLATE_ARGUMENT(bool, bDialogSizeIsRelative)
@@ -60,7 +60,7 @@ public:
 private:
   friend class FUltiCrosshairViewModel;
 
-  TWeakObjectPtr<AUTPlayerController> PlayerController;
+  TWeakObjectPtr<AUTBasePlayerController> PlayerController;
 
   TSharedRef<FUltiCrosshairViewModel> CrosshairViewModel;
 

@@ -74,7 +74,7 @@ bool FUltiCrossExecHandler::Exec(class UWorld* InWorld, const TCHAR* Cmd, FOutpu
   {
     Ar.Log(TEXT("UltiCross Activated"));
 
-    AUTPlayerController* PlayerController = Cast<AUTPlayerController>(GEngine->GetFirstLocalPlayerController(InWorld));
+    AUTBasePlayerController* PlayerController = Cast<AUTBasePlayerController>(GEngine->GetFirstLocalPlayerController(InWorld));
     UUTLocalPlayer* Player = Cast<UUTLocalPlayer>(PlayerController->Player);
 
     TSharedRef<class SUTDialogBase> Dialog = SNew(SUltiCrossConfigDialog)

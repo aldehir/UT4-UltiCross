@@ -393,7 +393,10 @@ void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, 
 
   if (PlayerController.IsValid())
   {
-    HUD = PlayerController->MyUTHUD;
+    AUTPlayerController* UTPlayerController = Cast<AUTPlayerController>(PlayerController.Get());
+    if (UTPlayerController != nullptr) {
+      HUD = UTPlayerController->MyUTHUD;
+    }
   }
 
   for (UUltiCrosshair* Crosshair : Crosshairs)
