@@ -10,7 +10,7 @@ UUltiCrosshair::UUltiCrosshair(class FObjectInitializer const & PCIP) : Super(PC
 void UUltiCrosshair::PostInitProperties()
 {
   Super::PostInitProperties();
-  Texture = UTexture2D::CreateTransient(64, 64);
+  Texture = UTexture2D::CreateTransient(192, 192);
   UpdateTexture();
 }
 
