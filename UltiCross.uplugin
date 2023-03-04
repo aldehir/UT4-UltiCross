@@ -10,7 +10,8 @@
   "Description" : "Customizable Crosshairs",
   "Category" : "UnrealTournament.Mod",
   "EnabledByDefault" : true,
-  "CanContainContent" : false,
+  "CanContainContent" : true,
+  "IsBetaVersion": true,
 
   "Modules" :
   [
