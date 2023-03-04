@@ -48,5 +48,6 @@ void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Ca
   float X = (Canvas->SizeX * 0.5f) - FMath::CeilToFloat(Width * 0.5f);
   float Y = (Canvas->SizeY * 0.5f) - FMath::CeilToFloat(Height * 0.5f);
 
+  Canvas->DrawColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f).ToFColor(false);
   Canvas->DrawTile(Texture, X, Y, Width, Height, 0.0f, 0.0f, Width, Height);
 }
