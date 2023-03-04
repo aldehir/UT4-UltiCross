@@ -27,8 +27,6 @@ private:
 
   FUltiCrossExecHandler *ExecHandler;
   TSharedPtr<FUltiCrosshairConstraints> Constraints;
-
-  void DumpDebug();
 };
 
 class FUltiCrossExecHandler : public FSelfRegisteringExec
