@@ -12,7 +12,7 @@
 
 void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 {
-  HUD = InArgs._HUD;
+  PlayerController = InArgs._PlayerController;
 
   SUTDialogBase::Construct(SUTDialogBase::FArguments()
     .PlayerOwner(InArgs._PlayerOwner)
@@ -369,9 +369,28 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
 
 void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, uint16 ButtonId)
 {
+  AUTHUD *HUD = nullptr;
+
+  if (PlayerController.IsValid())
+  {
+    HUD = PlayerController->MyUTHUD;
+  }
+
   for (UUltiCrosshair* Crosshair : Crosshairs)
   {
     Crosshair->SaveConfig();
+
+    // If there is a HUD, then update the instance in play
+    if (HUD != nullptr) {
+      if (HUD->Crosshairs.Contains(Crosshair->CrosshairTag))
+      {
+        UUltiCrosshair* LiveCrosshair = Cast<UUltiCrosshair>(HUD->Crosshairs[Crosshair->CrosshairTag]);
+        if (LiveCrosshair != nullptr)
+        {
+          LiveCrosshair->CopyCrosshairParameters(Crosshair);
+        }
+      }
+    }
   }
 }
 

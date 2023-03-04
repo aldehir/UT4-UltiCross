@@ -20,6 +20,20 @@ void UUltiCrosshair::UpdateTexture()
   Renderer.Render(this);
 }
 
+void UUltiCrosshair::CopyCrosshairParameters(UUltiCrosshair* Other)
+{
+  Type = Other->Type;
+  Outline = Other->Outline;
+  Rotation = Other->Rotation;
+  DotRadius = Other->DotRadius;
+  Color = Other->Color;
+  Crosshairs = Other->Crosshairs;
+  Circle = Other->Circle;
+  Ngon = Other->Ngon;
+
+  UpdateTexture();
+}
+
 TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString& PropertyPath)
 {
   TSharedRef<FUltiCrosshairConstraintMap> Map = FUltiCross::Get()->GetConstraintMapForPath(PropertyPath);

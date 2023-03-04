@@ -20,7 +20,7 @@ class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
   , _ButtonMask(UTDIALOG_BUTTON_OK)
   {}
   SLATE_ARGUMENT(TWeakObjectPtr<class UUTLocalPlayer>, PlayerOwner)
-  SLATE_ARGUMENT(TWeakObjectPtr<class AUTHUD>, HUD)
+  SLATE_ARGUMENT(TWeakObjectPtr<class AUTPlayerController>, PlayerController)
   SLATE_ARGUMENT(FText, DialogTitle)
   SLATE_ARGUMENT(FVector2D, DialogSize)
   SLATE_ARGUMENT(bool, bDialogSizeIsRelative)
@@ -60,7 +60,8 @@ public:
 private:
   friend class FUltiCrosshairViewModel;
 
-  TWeakObjectPtr<class AUTHUD> HUD;
+  TWeakObjectPtr<AUTPlayerController> PlayerController;
+
   TSharedRef<FUltiCrosshairViewModel> CrosshairViewModel;
 
   TSharedPtr<SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>> CrosshairTypeComboBox;

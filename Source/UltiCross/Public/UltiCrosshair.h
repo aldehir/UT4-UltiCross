@@ -147,6 +147,12 @@ public:
   UFUNCTION()
   void UpdateTexture();
 
+  /**
+   * Copies the crosshair parameters from Other to this and invokes
+   * UpdateTexture().
+   */
+  void CopyCrosshairParameters(UUltiCrosshair* Other);
+
   TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
   void PostInitProperties() override;
