@@ -47,9 +47,12 @@ float FConstrainedSliderDelegate::GetRaw() const
 void FConstrainedSliderDelegate::Set(float Value)
 {
   TSharedRef<FUltiCrosshairConstraint> Constraint = CachedConstraint;
-
   Value = Constraint->Denormalize(Value);
+  SetRaw(Value);
+}
 
+void FConstrainedSliderDelegate::SetRaw(float Value)
+{
   if (Prop->IsInteger()) {
     Prop->SetIntPropertyValue(PropData, (int64)Value);
   } else {
@@ -62,6 +65,16 @@ void FConstrainedSliderDelegate::Set(float Value)
 FText FConstrainedSliderDelegate::Text() const
 {
   return FText::AsNumber(GetRaw());
+}
+
+void FConstrainedSliderDelegate::CommitText(const FText& Input, ETextCommit::Type Commit)
+{
+  float Value = FCString::Atof(*Input.ToString());
+
+  TSharedRef<FUltiCrosshairConstraint> Constraint = CachedConstraint;
+  Value = Constraint->Round(Constraint->Clamp(Value));
+
+  SetRaw(Value);
 }
 
 FUltiCrosshairViewModel::FUltiCrosshairViewModel(SUltiCrossConfigDialog * View)

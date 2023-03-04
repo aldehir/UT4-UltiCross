@@ -21,7 +21,10 @@ public:
   float GetRaw() const;
 
   void Set(float value);
+  void SetRaw(float Value);
+
   FText Text() const;
+  void CommitText(const FText& Input, ETextCommit::Type Commit);
 
 private:
   FUltiCrosshairViewModel* ViewModel;

@@ -365,6 +365,7 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef
         .ForegroundColor(FLinearColor::Black)
         .MinDesiredWidth(48.0f)
         .Text(Delegate, &FConstrainedSliderDelegate::Text)
+        .OnTextCommitted(Delegate, &FConstrainedSliderDelegate::CommitText)
       ]
 
       // Slider
