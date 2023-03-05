@@ -127,10 +127,6 @@ FText FUltiCrosshairViewModel::GetName() const
 void FUltiCrosshairViewModel::OnNameChanged(const FText& Name, ETextCommit::Type CommitType)
 {
   Crosshair->SetUserDefinedNameFromText(Name);
-
-  // Propagate to CDO as well to update the Weapons Settings UI
-  UUltiCrosshair* CDO = GetMutableDefault<UUltiCrosshair>(Crosshair->GetClass());
-  CDO->SetUserDefinedNameFromText(Name);
 }
 
 FSlateBrush* FUltiCrosshairViewModel::GetBrush() const

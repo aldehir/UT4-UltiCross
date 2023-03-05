@@ -62,8 +62,6 @@ void UUltiCrosshair::CopyCrosshairParameters(UUltiCrosshair* Other)
   Crosshairs = Other->Crosshairs;
   Circle = Other->Circle;
   Ngon = Other->Ngon;
-
-  UpdateTexture();
 }
 
 TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString& PropertyPath)

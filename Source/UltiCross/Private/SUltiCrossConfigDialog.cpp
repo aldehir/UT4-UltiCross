@@ -449,6 +449,14 @@ void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, 
   {
     Crosshair->SaveConfig();
 
+    // Update CDO.
+    //
+    // For configuration options, this seems to already be done
+    // implicity with SaveConfig(). However, since CrosshairName is not marked
+    // as Config, it won't.
+    UUltiCrosshair* CDO = GetMutableDefault<UUltiCrosshair>(Crosshair->GetClass());
+    CDO->CopyCrosshairParameters(Crosshair);
+
     // If there is a HUD, then update the instance in play
     if (HUD != nullptr) {
       if (HUD->Crosshairs.Contains(Crosshair->CrosshairTag))
@@ -457,6 +465,7 @@ void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, 
         if (LiveCrosshair != nullptr)
         {
           LiveCrosshair->CopyCrosshairParameters(Crosshair);
+          LiveCrosshair->UpdateTexture();
         }
       }
     }
