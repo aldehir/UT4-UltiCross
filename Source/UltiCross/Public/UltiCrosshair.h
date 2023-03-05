@@ -161,3 +161,13 @@ public:
   void DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply) override;
 
 };
+
+UCLASS(Blueprintable)
+class ULTICROSS_API UUltiCrosshairBundle : public UObject
+{
+  GENERATED_UCLASS_BODY()
+
+public:
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UltiCross")
+  TArray<TSubclassOf<UUltiCrosshair>> Crosshairs;
+};

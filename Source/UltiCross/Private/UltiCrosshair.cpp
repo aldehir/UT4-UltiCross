@@ -51,3 +51,6 @@ void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Ca
   Canvas->DrawColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f).ToFColor(false);
   Canvas->DrawTile(Texture, X, Y, Width, Height, 0.0f, 0.0f, Width, Height);
 }
+
+UUltiCrosshairBundle::UUltiCrosshairBundle(FObjectInitializer const & PCIP) : Super(PCIP)
+{}
