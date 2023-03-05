@@ -8,8 +8,6 @@
 
 DECLARE_DELEGATE_OneParam(FUltiCrossConfigSelectionChangedDelegate, FName);
 
-class UUltiCrosshair;
-
 class SUltiCrossConfigDialog : public SUTDialogBase, public FGCObject
 {
   SLATE_BEGIN_ARGS(SUltiCrossConfigDialog)
@@ -52,6 +50,7 @@ public:
 
   TSharedRef<SWidget> GenerateCrosshairTypeListWidget(TSharedPtr<FUltiCrosshairTypeDescriptor> InItem);
 
+  SVerticalBox::FSlot& AddNameEdit();
   SVerticalBox::FSlot& AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate);
 
   TSharedRef<SWidget> ConstructPropertiesPanel();
@@ -68,6 +67,7 @@ private:
 
   TSharedRef<FUltiCrosshairViewModel> CrosshairViewModel;
 
+  TSharedPtr<SComboBox<UUltiCrosshair*>> CrosshairComboBox;
   TSharedPtr<SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>> CrosshairTypeComboBox;
 
   TArray<UUltiCrosshair*> Crosshairs;

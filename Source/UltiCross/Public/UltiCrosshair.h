@@ -108,6 +108,10 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UltiCross")
   int UltiCrossSlot;
 
+  /** User-defined Name */
+  UPROPERTY(Config)
+  FString UserDefinedName;
+
   /** Crosshair Type */
   UPROPERTY(Config)
   EUltiCrossCrosshairType Type;
@@ -147,6 +151,10 @@ public:
   UFUNCTION()
   void UpdateTexture();
 
+  void InitializeName();
+  FText GetUserDefinedNameAsText() const;
+  void SetUserDefinedNameFromText(const FText& Name);
+
   /**
    * Copies the crosshair parameters from Other to this and invokes
    * UpdateTexture().
@@ -155,7 +163,8 @@ public:
 
   TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
-  void PostInitProperties() override;
+  virtual void PostLoad() override;
+  virtual void PostInitProperties() override;
 
   /** Draw the crosshair using our own implementation. */
   void DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply) override;

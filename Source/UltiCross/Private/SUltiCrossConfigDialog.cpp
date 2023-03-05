@@ -117,7 +117,7 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
 
 TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshairSelection()
 {
-  return SNew(SComboBox<UUltiCrosshair*>)
+  SAssignNew(CrosshairComboBox, SComboBox<UUltiCrosshair*>)
     .InitiallySelectedItem(CrosshairViewModel->GetCrosshair())
     .ComboBoxStyle(SUTStyle::Get(), "UT.ComboBox")
     .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
@@ -127,10 +127,12 @@ TSharedRef<SComboBox<UUltiCrosshair*>> SUltiCrossConfigDialog::ConstructCrosshai
     .Content()
     [
       SNew(STextBlock)
-      .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetCrosshairName)
+      .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetName)
       .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
       .ColorAndOpacity(FLinearColor::Black)
     ];
+
+  return CrosshairComboBox.ToSharedRef();
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
@@ -145,10 +147,12 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
     [
       SNew(SVerticalBox)
 
+      +AddNameEdit()
+
       +SVerticalBox::Slot()
       .HAlign(HAlign_Fill)
       .AutoHeight()
-      .Padding(FMargin(40.0f, 0.0f, 10.0f, 5.0f))
+      .Padding(FMargin(40.0f, 15.0f, 10.0f, 5.0f))
       [
         SNew(SHorizontalBox)
 
@@ -313,7 +317,7 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCro
     .Padding(5)
     [
       SNew(STextBlock)
-      .Text(InItem->CrosshairName)
+      .Text_UObject(InItem, &UUltiCrosshair::GetUserDefinedNameAsText)
       .TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
     ];
 }
@@ -341,6 +345,37 @@ void SUltiCrossConfigDialog::AddReferencedObjects(FReferenceCollector& Collector
   {
     Collector.AddReferencedObject(Crosshairs[i]);
   }
+}
+
+SVerticalBox::FSlot& SUltiCrossConfigDialog::AddNameEdit()
+{
+  return SVerticalBox::Slot()
+  .HAlign(HAlign_Fill)
+  .AutoHeight()
+  .Padding(FMargin(40.0f, 0.0f, 10.0f, 5.0f))
+  [
+    SNew(SHorizontalBox)
+
+    // Caption
+    +SHorizontalBox::Slot()
+    .AutoWidth()
+    [
+      SNew(STextBlock)
+      .MinDesiredWidth(200)
+      .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small.Bold")
+      .Text(FText::FromString(TEXT("Name")))
+    ]
+
+    +SHorizontalBox::Slot()
+    .FillWidth(1)
+    [
+      SNew(SEditableTextBox)
+      .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
+      .ForegroundColor(FLinearColor::Black)
+      .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetName)
+      .OnTextCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::OnNameChanged)
+    ]
+  ];
 }
 
 SVerticalBox::FSlot& SUltiCrossConfigDialog::AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate)

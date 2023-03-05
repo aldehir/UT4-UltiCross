@@ -7,11 +7,41 @@ UUltiCrosshair::UUltiCrosshair(class FObjectInitializer const & PCIP) : Super(PC
 {
 }
 
+void UUltiCrosshair::PostLoad()
+{
+  Super::PostLoad();
+  InitializeName();
+}
+
 void UUltiCrosshair::PostInitProperties()
 {
   Super::PostInitProperties();
   Texture = UTexture2D::CreateTransient(192, 192);
   UpdateTexture();
+}
+
+void UUltiCrosshair::InitializeName()
+{
+  // Default to the Crosshair Name if empty
+  if (UserDefinedName.IsEmpty())
+  {
+    UserDefinedName = CrosshairName.ToString();
+    return;
+  }
+
+  // Otherwise, set CrosshairName to UserDefinedName for the UI
+  CrosshairName = FText::FromString(UserDefinedName);
+}
+
+FText UUltiCrosshair::GetUserDefinedNameAsText() const
+{
+  return FText::FromString(UserDefinedName);
+}
+
+void UUltiCrosshair::SetUserDefinedNameFromText(const FText& Name)
+{
+  UserDefinedName = Name.ToString();
+  CrosshairName = Name;
 }
 
 void UUltiCrosshair::UpdateTexture()
@@ -22,6 +52,8 @@ void UUltiCrosshair::UpdateTexture()
 
 void UUltiCrosshair::CopyCrosshairParameters(UUltiCrosshair* Other)
 {
+  CrosshairName = Other->CrosshairName;
+  UserDefinedName = Other->UserDefinedName;
   Type = Other->Type;
   Outline = Other->Outline;
   Rotation = Other->Rotation;
