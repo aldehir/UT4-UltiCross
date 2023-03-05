@@ -1,21 +1,26 @@
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
-BuildBat := "../../../Engine/Build/BatchFiles/Build.bat"
-EditorExe := "../../../Engine/Binaries/Win64/UE4Editor-Win64-Debug.exe"
 Platform := "Win64"
 Version := "1.0-alpha.2"
 
+BuildBat := "../../../Engine/Build/BatchFiles/Build.bat"
+EditorExe := "../../../Engine/Binaries/Win64/UE4Editor-Win64-Debug.exe"
+GameArgs := "UnrealTournament -Game /Game/RestrictedAssets/Maps/Example_Map -ResX=1280 -ResY=768 -Windowed"
+
 build:
-  & {{ BuildBat }} UnrealTournamentEditor {{ Platform }} Debug -waitmutex
+  {{ BuildBat }} UnrealTournamentEditor {{ Platform }} Debug -waitmutex
+
+debug:
+  WinDbgX {{ EditorExe }} {{ GameArgs }}
 
 play:
-  & {{ EditorExe }} UnrealTournament -Game /Game/RestrictedAssets/Maps/Example_Map -ResX=1280 -ResY=768 -Windowed
+  {{ EditorExe }} {{ GameArgs }}
 
 build-editor:
-  & {{ BuildBat }} UnrealTournamentEditor {{ Platform }} Development -waitmutex
+  {{ BuildBat }} UnrealTournamentEditor {{ Platform }} Development -waitmutex
 
 build-game:
-  & {{ BuildBat }} UnrealTournament {{ Platform }} Shipping -waitmutex
+  {{ BuildBat }} UnrealTournament {{ Platform }} Shipping -waitmutex
 
 package: build-editor build-game
   If (Test-Path Release/{{ Version }}) { Remove-Item Release/{{ Version }} -Recurse | Out-Null }
