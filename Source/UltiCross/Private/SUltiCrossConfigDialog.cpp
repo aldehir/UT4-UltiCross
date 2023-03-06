@@ -44,6 +44,8 @@ void SUltiCrossConfigDialog::Construct(const FArguments& InArgs)
     }
   }
 
+  UpdateCopyFromCrosshairs();
+
   if (DialogContent.IsValid())
   {
     DialogContent->AddSlot()
@@ -309,6 +311,7 @@ void SUltiCrossConfigDialog::OnCrosshairChanged(UUltiCrosshair* NewSelection, ES
 {
   CrosshairViewModel->SetCrosshair(NewSelection);
   OnSelectionChanged.ExecuteIfBound(NewSelection->CrosshairTag);
+  UpdateCopyFromCrosshairs();
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCrosshair* InItem)
@@ -320,6 +323,65 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairListWidget(UUltiCro
       .Text_UObject(InItem, &UUltiCrosshair::GetUserDefinedNameAsText)
       .TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
     ];
+}
+
+TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCopyFromMenu()
+{
+  TSharedRef<SVerticalBox> MenuBox = SNew(SVerticalBox);
+
+  for (UUltiCrosshair* Crosshair : CopyFromCrosshairs)
+  {
+    MenuBox->AddSlot()
+      .HAlign(HAlign_Fill)
+      .AutoHeight()
+      .Padding(FMargin(0.0f, 5.0f))
+      [
+        SNew(SButton)
+        .Text_UObject(Crosshair, &UUltiCrosshair::GetUserDefinedNameAsText)
+        .TextStyle(SUTStyle::Get(), "UT.Font.ContextMenuItem")
+        .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
+        .ContentPadding(FMargin(5.0f))
+        .OnClicked(this, &SUltiCrossConfigDialog::OnCopyFromItemClicked, Crosshair)
+      ];
+  }
+
+  return SNew(SOverlay)
+    +SOverlay::Slot()
+    .HAlign(HAlign_Fill)
+    .VAlign(VAlign_Fill)
+    [
+      SNew(SImage)
+      .Image(SUTStyle::Get().GetBrush("UT.HeaderBackground.SuperLight"))
+    ]
+
+    +SOverlay::Slot()
+    .HAlign(HAlign_Fill)
+    .VAlign(VAlign_Fill)
+    [
+      SNew(SBox)
+      .HeightOverride(300.0f)
+      .WidthOverride(200.0f)
+      [
+        SNew(SScrollBox)
+        .Style(SUWindowsStyle::Get(), "UT.ScrollBox.Borderless")
+        .ConsumeMouseWheel(EConsumeMouseWheel::Always)  // By default, it will scroll the parent when we reached the end
+
+        +SScrollBox::Slot()
+        .HAlign(HAlign_Fill)
+        .VAlign(VAlign_Fill)
+        .Padding(FMargin(0.0f, 5.0f))
+        [
+          MenuBox
+        ]
+      ]
+    ];
+}
+
+FReply SUltiCrossConfigDialog::OnCopyFromItemClicked(UUltiCrosshair* InItem)
+{
+  CrosshairViewModel->CopyCrosshair(InItem);
+  CopyFromComboButton->SetIsOpen(false);
+  return FReply::Handled();
 }
 
 TSharedRef<SWidget> SUltiCrossConfigDialog::GenerateCrosshairTypeListWidget(TSharedPtr<FUltiCrosshairTypeDescriptor> InItem)
@@ -337,6 +399,21 @@ void SUltiCrossConfigDialog::GatherCrosshairs()
 {
   Crosshairs.Empty();
   FUltiCross::Get()->GetUltiCrosshairs(GetPlayerOwner().Get(), Crosshairs);
+}
+
+void SUltiCrossConfigDialog::UpdateCopyFromCrosshairs()
+{
+  CopyFromCrosshairs.Empty();
+
+  for (UUltiCrosshair* Crosshair : Crosshairs)
+  {
+    if (Crosshair->CrosshairTag.Compare(CrosshairViewModel->GetCrosshair()->CrosshairTag) == 0)
+    {
+      continue;
+    }
+
+    CopyFromCrosshairs.Add(Crosshair);
+  }
 }
 
 void SUltiCrossConfigDialog::AddReferencedObjects(FReferenceCollector& Collector)
@@ -369,11 +446,35 @@ SVerticalBox::FSlot& SUltiCrossConfigDialog::AddNameEdit()
     +SHorizontalBox::Slot()
     .FillWidth(1)
     [
-      SNew(SEditableTextBox)
-      .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
-      .ForegroundColor(FLinearColor::Black)
-      .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetName)
-      .OnTextCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::OnNameChanged)
+      SNew(SHorizontalBox)
+
+      // Name Edit Box
+      +SHorizontalBox::Slot()
+      .FillWidth(1)
+      [
+        SNew(SEditableTextBox)
+        .Style(SUTStyle::Get(), "UT.EditBox.Boxed")
+        .ForegroundColor(FLinearColor::Black)
+        .Text(CrosshairViewModel, &FUltiCrosshairViewModel::GetName)
+        .OnTextCommitted(CrosshairViewModel, &FUltiCrosshairViewModel::OnNameChanged)
+      ]
+
+      // Copy From Button
+      +SHorizontalBox::Slot()
+      .Padding(10.0f, 0.0f, 0.0f, 0.0f)
+      .AutoWidth()
+      [
+        SAssignNew(CopyFromComboButton, SComboButton)
+        .ButtonStyle(SUTStyle::Get(), "UT.SimpleButton.Bright")
+        .OnGetMenuContent(this, &SUltiCrossConfigDialog::GenerateCopyFromMenu)
+        .ButtonContent()
+        [
+          SNew(STextBlock)
+          .Text(FText::FromString(TEXT("Copy From")))
+          .TextStyle(SUTStyle::Get(), "UT.Font.NormalText.Small")
+          .ColorAndOpacity(FLinearColor::Black)
+        ]
+      ]
     ]
   ];
 }

@@ -47,6 +47,7 @@ public:
 
   void SetCrosshair(UUltiCrosshair* Crosshair);
   UUltiCrosshair* GetCrosshair() const;
+  void CopyCrosshair(UUltiCrosshair* Other);
 
   FText GetName() const;
   void OnNameChanged(const FText& Name, ETextCommit::Type CommitType);

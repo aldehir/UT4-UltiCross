@@ -50,6 +50,12 @@ public:
 
   TSharedRef<SWidget> GenerateCrosshairTypeListWidget(TSharedPtr<FUltiCrosshairTypeDescriptor> InItem);
 
+  void UpdateCopyFromCrosshairs();
+
+  TSharedRef<SWidget> GenerateCopyFromMenu();
+
+  FReply OnCopyFromItemClicked(UUltiCrosshair* InItem);
+
   SVerticalBox::FSlot& AddNameEdit();
   SVerticalBox::FSlot& AddSlider(FText Caption, TSharedRef<FConstrainedSliderDelegate> Delegate);
 
@@ -71,6 +77,10 @@ private:
   TSharedPtr<SComboBox<TSharedPtr<FUltiCrosshairTypeDescriptor>>> CrosshairTypeComboBox;
 
   TArray<UUltiCrosshair*> Crosshairs;
+
+  TArray<UUltiCrosshair*> CopyFromCrosshairs;
+
+  TSharedPtr<SComboButton> CopyFromComboButton;
 
   FUltiCrossConfigSelectionChangedDelegate OnSelectionChanged;
 };

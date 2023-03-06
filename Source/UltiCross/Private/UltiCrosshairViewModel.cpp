@@ -119,6 +119,21 @@ UUltiCrosshair* FUltiCrosshairViewModel::GetCrosshair() const
   return Crosshair;
 }
 
+
+void FUltiCrosshairViewModel::CopyCrosshair(UUltiCrosshair* Other)
+{
+  // Keep these so we can restore them afterwards
+  FString OrigUDN = Crosshair->UserDefinedName;
+  FText OrigName = Crosshair->CrosshairName;
+
+  Crosshair->CopyCrosshairParameters(Other);
+
+  Crosshair->UserDefinedName = OrigUDN;
+  Crosshair->CrosshairName = OrigName;
+
+  Crosshair->UpdateTexture();
+}
+
 FText FUltiCrosshairViewModel::GetName() const
 {
   return Crosshair->GetUserDefinedNameAsText();
