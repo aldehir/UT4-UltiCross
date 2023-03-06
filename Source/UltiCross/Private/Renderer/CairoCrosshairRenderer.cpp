@@ -31,6 +31,7 @@ void FCairoContext::Restore() { cairo_restore(Context); }
 
 void FCairoContext::Paint() { cairo_paint(Context); }
 
+void FCairoContext::NewPath() { cairo_new_path(Context); }
 void FCairoContext::MoveTo(const FVector2D& Point) { cairo_move_to(Context, Point.X, Point.Y); }
 void FCairoContext::LineTo(const FVector2D& Point) { cairo_line_to(Context, Point.X, Point.Y); }
 void FCairoContext::RelLineTo(const FVector2D& Vec) { cairo_rel_line_to(Context, Vec.X, Vec.Y); }
@@ -47,10 +48,24 @@ void FCairoContext::SetSourceRGBA(const FLinearColor& Color) { cairo_set_source_
 void FCairoContext::SetLineWidth(float Width) { cairo_set_line_width(Context, Width); }
 void FCairoContext::SetOperator(cairo_operator_t Op) { cairo_set_operator(Context, Op); }
 
-void FCairoContext::Fill() { cairo_fill(Context); }
-void FCairoContext::Stroke() { cairo_stroke(Context); }
-void FCairoContext::FillPreserve() { cairo_fill_preserve(Context); }
-void FCairoContext::StrokePreserve() { cairo_stroke(Context); }
+void FCairoContext::Fill(bool bPreserve) {
+  if (bPreserve)
+  {
+    cairo_fill_preserve(Context);
+    return;
+  }
+
+  cairo_fill(Context);
+}
+void FCairoContext::Stroke(bool bPreserve) {
+  if (bPreserve)
+  {
+    cairo_stroke_preserve(Context);
+    return;
+  }
+
+  cairo_stroke(Context);
+}
 
 FCairoCrosshairRenderer::FCairoCrosshairRenderer()
 {}
@@ -142,6 +157,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   for (const float Angle : Angles)
   {
     Cairo.Save();
+    Cairo.NewPath();
 
     // Rotate about the center
     Cairo.Translate(Center);
@@ -210,6 +226,7 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
   Center += Transform.Translate;
 
   Cairo.Save();
+  Cairo.NewPath();
 
   Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
   Cairo.ClosePath();
@@ -220,7 +237,8 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
   {
     Cairo.SetLineWidth((2.0f * Outline) + Thickness);
     Cairo.SetSourceRGBA(Crosshair->Color.Outline);
-    Cairo.StrokePreserve();
+
+    Cairo.Stroke((Ctx.Render & RenderFill) != 0);
   }
 
   if (Ctx.Render & RenderFill)
@@ -260,6 +278,7 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
   Center += Transform.Translate;
 
   Cairo.Save();
+  Cairo.NewPath();
 
   Cairo.Arc(Center, Radius, FMath::DegreesToRadians(0.0f), FMath::DegreesToRadians(360.0f));
   Cairo.ClosePath();
@@ -270,7 +289,7 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
   {
     Cairo.SetLineWidth(2.0f * Outline);
     Cairo.SetSourceRGBA(Crosshair->Color.Outline);
-    Cairo.StrokePreserve();
+    Cairo.Stroke((Ctx.Render & RenderFill) != 0);
   }
 
   if (Ctx.Render & RenderFill)

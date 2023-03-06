@@ -41,6 +41,7 @@ public:
 
   void Paint();
 
+  void NewPath();
   void MoveTo(const FVector2D& Point);
   void LineTo(const FVector2D& Point);
   void RelLineTo(const FVector2D& Vec);
@@ -54,10 +55,8 @@ public:
   void SetLineWidth(float Width);
   void SetOperator(cairo_operator_t Op);
 
-  void Fill();
-  void Stroke();
-  void FillPreserve();
-  void StrokePreserve();
+  void Fill(bool bPreserve = false);
+  void Stroke(bool bPreserve = false);
 
 private:
   cairo_t* Context;
