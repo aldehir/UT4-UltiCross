@@ -21,8 +21,12 @@ public:
   TSharedRef<FUltiCrosshairConstraintMap> GetConstraintMapForPath(const FString& Path);
 
   void GetUltiCrosshairs(UObject* Outer, TArray<UUltiCrosshair*>& Crosshairs);
+  void GetDefaultUltiCrosshairs(TArray<UUltiCrosshair*>& Crosshairs);
+  void GetUltiCrosshairsClasses(TArray<UClass*>& Classes);
 
 private:
+  void LoadConfig();
+
   static FUltiCross* Instance;
 
   FUltiCrossExecHandler *ExecHandler;

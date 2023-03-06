@@ -99,7 +99,7 @@ struct FUltiCrossColors
   FLinearColor Outline;
 };
 
-UCLASS(Config = Game, ConfigDoNotCheckDefaults)
+UCLASS(Config = UltiCross, ConfigDoNotCheckDefaults)
 class ULTICROSS_API UUltiCrosshair : public UUTCrosshair
 {
   GENERATED_UCLASS_BODY()
@@ -168,6 +168,11 @@ public:
 
   /** Draw the crosshair using our own implementation. */
   void DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply) override;
+
+  static FString GetIniFilename();
+
+  void SaveCrosshair();
+  void LoadCrosshair();
 
 };
 

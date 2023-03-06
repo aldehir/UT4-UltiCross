@@ -21,6 +21,8 @@ void FUltiCross::StartupModule()
     FUltiCross::Instance = this;
   }
 
+  LoadConfig();
+
   ExecHandler = new FUltiCrossExecHandler();
   Constraints = MakeShareable(new FUltiCrosshairConstraints());
 }
@@ -32,24 +34,65 @@ void FUltiCross::ShutdownModule()
 
 void FUltiCross::GetUltiCrosshairs(UObject* Outer, TArray<UUltiCrosshair*>& Crosshairs)
 {
+  TArray<UClass*> Classes;
+  GetUltiCrosshairsClasses(Classes);
+
+  Crosshairs.Empty();
+
+  for (UClass* Class : Classes)
+  {
+    UUltiCrosshair* Crosshair = NewObject<UUltiCrosshair>(Outer, Class, NAME_None, RF_NoFlags);
+    if (Crosshair)
+    {
+      Crosshairs.Add(Crosshair);
+    }
+  }
+}
+
+void FUltiCross::GetDefaultUltiCrosshairs(TArray<UUltiCrosshair*>& Crosshairs)
+{
+  TArray<UClass*> Classes;
+  GetUltiCrosshairsClasses(Classes);
+
+  Crosshairs.Empty();
+
+  for (UClass* Class : Classes)
+  {
+    UUltiCrosshair* CDO = GetMutableDefault<UUltiCrosshair>(Class);
+    if (CDO)
+    {
+      Crosshairs.Add(CDO);
+    }
+  }
+}
+
+void FUltiCross::GetUltiCrosshairsClasses(TArray<UClass*>& Classes)
+{
   FName NAME_GeneratedClass(TEXT("GeneratedClass"));
 
-  // Load all Blueprint crosshairs that inherit UUlitCrosshair
-  Crosshairs.Empty();
+  // Find all blueprint crosshair classes
   TArray<FAssetData> AssetList;
   GetAllBlueprintAssetData(UUltiCrosshair::StaticClass(), AssetList);
 
   for (const FAssetData& Asset : AssetList)
   {
     const FString* ClassPath = Asset.TagsAndValues.Find(NAME_GeneratedClass);
-    UClass* CrosshairClass = LoadObject<UClass>(NULL, **ClassPath);
-    if (CrosshairClass == nullptr) continue;
+    UClass* Class = LoadObject<UClass>(NULL, **ClassPath);
+    if (Class == nullptr) continue;
 
-    UUltiCrosshair* Crosshair = NewObject<UUltiCrosshair>(Outer, CrosshairClass, NAME_None, RF_NoFlags);
-    if (Crosshair)
-    {
-      Crosshairs.Add(Crosshair);
-    }
+    Classes.Add(Class);
+  }
+}
+
+void FUltiCross::LoadConfig()
+{
+  TArray<UUltiCrosshair*> CDOs;
+  GetDefaultUltiCrosshairs(CDOs);
+
+  for (UUltiCrosshair* Crosshair : CDOs)
+  {
+    Crosshair->LoadCrosshair();
+    UE_LOG(LogUltiCross, Log, TEXT("Loaded config for %s"), *Crosshair->GetName());
   }
 }
 

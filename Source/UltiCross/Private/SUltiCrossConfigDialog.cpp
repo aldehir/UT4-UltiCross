@@ -548,7 +548,7 @@ void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, 
 
   for (UUltiCrosshair* Crosshair : Crosshairs)
   {
-    Crosshair->SaveConfig();
+    Crosshair->SaveCrosshair();
 
     // Update CDO.
     //

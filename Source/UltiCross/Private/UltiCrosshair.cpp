@@ -82,5 +82,21 @@ void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Ca
   Canvas->DrawTile(Texture, X, Y, Width, Height, 0.0f, 0.0f, Width, Height);
 }
 
+FString UUltiCrosshair::GetIniFilename()
+{
+  return FPaths::Combine(*FPaths::GeneratedConfigDir(), FPlatformProperties::PlatformName(), TEXT("UltiCross.ini"));
+}
+
+
+void UUltiCrosshair::SaveCrosshair()
+{
+  SaveConfig(CPF_Config, *GetIniFilename());
+}
+
+void UUltiCrosshair::LoadCrosshair()
+{
+  LoadConfig(GetClass(), *GetIniFilename());
+}
+
 UUltiCrosshairBundle::UUltiCrosshairBundle(FObjectInitializer const & PCIP) : Super(PCIP)
 {}
