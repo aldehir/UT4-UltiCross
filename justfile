@@ -5,6 +5,7 @@ Version := "1.0-alpha.2"
 
 BuildBat := "../../../Engine/Build/BatchFiles/Build.bat"
 EditorExe := "../../../Engine/Binaries/Win64/UE4Editor-Win64-Debug.exe"
+EditorArgs := "UnrealTournament"
 GameArgs := "UnrealTournament -Game /Game/RestrictedAssets/Maps/Example_Map -ResX=1280 -ResY=768 -Windowed"
 
 build:
@@ -12,6 +13,9 @@ build:
 
 debug:
   WinDbgX {{ EditorExe }} {{ GameArgs }}
+
+edit:
+  {{ EditorExe }} {{ EditorArgs }}
 
 play:
   {{ EditorExe }} {{ GameArgs }}
