@@ -105,9 +105,11 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
   FUltiCrossCrosshairParams Params(Crosshair->Crosshairs);
 
   float Outline = Crosshair->Outline;
-  float Rotation = FMath::Clamp(Crosshair->Rotation, 0.0f, 360.0f);
   float Thickness = Params.Thickness;
   float CenterGap = Params.CenterGap;
+
+  FUltiCrossTransform Transform = Crosshair->Transform;
+  float Rotate = FMath::Clamp(Transform.Rotate, 0.0f, 360.0f);
 
   // Do nothing if length = 0
   if (FMath::IsNearlyZero(Params.Length)) return;
@@ -119,7 +121,7 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
 
   for (float Angle = 0.0f; Angle < 360.5f; Angle += AngleIncrement)
   {
-    float Wrapped = FMath::Fmod(Rotation + Angle, 360.0f);
+    float Wrapped = FMath::Fmod(Rotate + Angle, 360.0f);
 
     // If any angle is a multiple of 90 and thickness == 0.5, then we want to offset
     // the center by 1 in both axes to render a pixel perfect crosshair.
@@ -134,6 +136,8 @@ void FCairoCrosshairRenderer::RenderCrosshairs(FCairoContext& Cairo, FRenderCont
     Center = Center - 0.5f;
     CenterGap = CenterGap - 0.5f;
   }
+
+  Center += Transform.Translate;
 
   for (const float Angle : Angles)
   {
@@ -183,6 +187,8 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
   float Thickness = Crosshair->Circle.Thickness;
   float Radius = Crosshair->Circle.Radius;
 
+  FUltiCrossTransform Transform = Crosshair->Transform;
+
   if (FMath::IsNearlyZero(Radius)) return;
 
   // Adjust radius for better pixel alignment
@@ -200,6 +206,8 @@ void FCairoCrosshairRenderer::RenderCircle(FCairoContext& Cairo, FRenderContext&
       Radius = Radius - 0.5f;
     }
   }
+
+  Center += Transform.Translate;
 
   Cairo.Save();
 
@@ -238,6 +246,8 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
   float Outline = Crosshair->Outline;
   float Radius = Crosshair->DotRadius;
 
+  FUltiCrossTransform Transform = Crosshair->Transform;
+
   if (FMath::IsNearlyZero(Radius)) return;
 
   FVector2D Center = Ctx.Center;
@@ -246,6 +256,8 @@ void FCairoCrosshairRenderer::RenderDot(FCairoContext& Cairo, FRenderContext& Ct
     Center = Center - 0.5f;
     Radius = Radius - 0.5f;
   }
+
+  Center += Transform.Translate;
 
   Cairo.Save();
 

@@ -56,12 +56,12 @@ void UUltiCrosshair::CopyCrosshairParameters(UUltiCrosshair* Other)
   UserDefinedName = Other->UserDefinedName;
   Type = Other->Type;
   Outline = Other->Outline;
-  Rotation = Other->Rotation;
   DotRadius = Other->DotRadius;
   Color = Other->Color;
   Crosshairs = Other->Crosshairs;
   Circle = Other->Circle;
   Ngon = Other->Ngon;
+  Transform = Other->Transform;
 }
 
 TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString& PropertyPath)

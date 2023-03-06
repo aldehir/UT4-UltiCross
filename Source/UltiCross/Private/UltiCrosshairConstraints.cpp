@@ -77,10 +77,6 @@ void FUltiCrosshairConstraintMap::Add(EUltiCrossCrosshairType Type, TSharedRef<F
 
 FUltiCrosshairConstraints::FUltiCrosshairConstraints()
 {
-  CONSTRAINTS_START("Rotation");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 360.0f, 5.0f);
-  CONSTRAINTS_END();
-
   CONSTRAINTS_START("Outline");
   CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 10.0f, 1.0f);
   CONSTRAINTS_END();
@@ -135,5 +131,17 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
 
   CONSTRAINTS_START("Ngon.OffsetY");
   CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 5.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Transform.Rotate");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 360.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Transform.Translate.X");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, -15.0f, 15.0f, 0.5f);
+  CONSTRAINTS_END();
+
+  CONSTRAINTS_START("Transform.Translate.Y");
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, -15.0f, 15.0f, 0.5f);
   CONSTRAINTS_END();
 }

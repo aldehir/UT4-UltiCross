@@ -99,6 +99,23 @@ struct FUltiCrossColors
   FLinearColor Outline;
 };
 
+USTRUCT()
+struct FUltiCrossTransform
+{
+  GENERATED_USTRUCT_BODY()
+
+  FUltiCrossTransform()
+  : Rotate(0.0f)
+  , Translate(0.0f, 0.0f)
+  {}
+
+  UPROPERTY()
+  float Rotate;
+
+  UPROPERTY()
+  FVector2D Translate;
+};
+
 UCLASS(Config = UltiCross, ConfigDoNotCheckDefaults)
 class ULTICROSS_API UUltiCrosshair : public UUTCrosshair
 {
@@ -120,10 +137,6 @@ public:
   UPROPERTY(Config)
   float Outline;
 
-  /** Rotation */
-  UPROPERTY(Config)
-  float Rotation;
-
   /** Dot Radius */
   UPROPERTY(Config)
   float DotRadius;
@@ -143,6 +156,10 @@ public:
   /** Parameters for Ngon type */
   UPROPERTY(Config)
   FUltiCrossNgonParams Ngon;
+
+  /** Global Transformations */
+  UPROPERTY(Config)
+  FUltiCrossTransform Transform;
 
   /** Generated Crosshair texture */
   UPROPERTY(Transient)

@@ -227,9 +227,12 @@ TSharedRef<SWidget> SUltiCrossConfigDialog::ConstructPropertiesPanel()
         ]
       ]
 
-      +AddSlider(FText::FromString(TEXT("Rotation")), CrosshairViewModel->GetDelegate("Rotation"))
       +AddSlider(FText::FromString(TEXT("Outline")), CrosshairViewModel->GetDelegate("Outline"))
       +AddSlider(FText::FromString(TEXT("Dot Radius")), CrosshairViewModel->GetDelegate("DotRadius"))
+
+      +AddSlider(FText::FromString(TEXT("Rotate")), CrosshairViewModel->GetDelegate("Transform.Rotate"))
+      +AddSlider(FText::FromString(TEXT("Translate X")), CrosshairViewModel->GetDelegate("Transform.Translate.X"))
+      +AddSlider(FText::FromString(TEXT("Translate Y")), CrosshairViewModel->GetDelegate("Transform.Translate.Y"))
 
       // Fill Color Picker
       +SVerticalBox::Slot()
