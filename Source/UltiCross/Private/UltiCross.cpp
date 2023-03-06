@@ -21,8 +21,6 @@ void FUltiCross::StartupModule()
     FUltiCross::Instance = this;
   }
 
-  LoadConfig();
-
   ExecHandler = new FUltiCrossExecHandler();
   Constraints = MakeShareable(new FUltiCrosshairConstraints());
 }
@@ -81,18 +79,6 @@ void FUltiCross::GetUltiCrosshairsClasses(TArray<UClass*>& Classes)
     if (Class == nullptr) continue;
 
     Classes.Add(Class);
-  }
-}
-
-void FUltiCross::LoadConfig()
-{
-  TArray<UUltiCrosshair*> CDOs;
-  GetDefaultUltiCrosshairs(CDOs);
-
-  for (UUltiCrosshair* Crosshair : CDOs)
-  {
-    Crosshair->LoadCrosshair();
-    UE_LOG(LogUltiCross, Log, TEXT("Loaded config for %s"), *Crosshair->GetName());
   }
 }
 

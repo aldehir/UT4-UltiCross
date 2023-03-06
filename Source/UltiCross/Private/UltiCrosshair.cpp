@@ -10,6 +10,8 @@ UUltiCrosshair::UUltiCrosshair(class FObjectInitializer const & PCIP) : Super(PC
 void UUltiCrosshair::PostLoad()
 {
   Super::PostLoad();
+
+  LoadCrosshair();
   InitializeName();
 }
 

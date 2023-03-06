@@ -25,8 +25,6 @@ public:
   void GetUltiCrosshairsClasses(TArray<UClass*>& Classes);
 
 private:
-  void LoadConfig();
-
   static FUltiCross* Instance;
 
   FUltiCrossExecHandler *ExecHandler;
