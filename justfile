@@ -1,7 +1,7 @@
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 Platform := "Win64"
-Version := "1.0-alpha.5"
+Version := "1.0"
 
 BuildBat := "../../../Engine/Build/BatchFiles/Build.bat"
 EditorExe := "../../../Engine/Binaries/Win64/UE4Editor-Win64-Debug.exe"
