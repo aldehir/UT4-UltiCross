@@ -2,6 +2,7 @@
 
 Parameterized Crosshairs for UT4.
 
+![1px Crosshair](Examples/crosshair-1px.png)
 
 ## Installation
 
