@@ -78,6 +78,8 @@ TSharedRef<FUltiCrosshairConstraint> UUltiCrosshair::GetConstraint(const FString
 
 void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Canvas, AUTWeapon* Weapon, float DeltaTime, const FWeaponCustomizationInfo& CustomizationsToApply)
 {
+  float HUDCrosshairScale = (TargetHUD == nullptr ? 1.0f : TargetHUD->GetCrosshairScale());
+
   float Width = Texture->GetSurfaceWidth();
   float Height = Texture->GetSurfaceHeight();
 
@@ -85,7 +87,7 @@ void UUltiCrosshair::DrawCrosshair_Implementation(AUTHUD* TargetHUD, UCanvas* Ca
   float Y = (Canvas->SizeY * 0.5f) - FMath::CeilToFloat(Height * 0.5f);
 
   Canvas->DrawColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f).ToFColor(false);
-  Canvas->DrawTile(Texture, X, Y, Width, Height, 0.0f, 0.0f, Width, Height);
+  Canvas->DrawTile(Texture, X, Y, Width * HUDCrosshairScale, Height * HUDCrosshairScale, 0.0f, 0.0f, Width, Height);
 }
 
 FString UUltiCrosshair::GetIniFilename()
