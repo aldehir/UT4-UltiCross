@@ -34,9 +34,4 @@ desired crosshair.
 
 ## Examples
 
-Here are some examples of the crosshairs you can make with UtliCross:
-
-![1px Crosshair](Examples/crosshair-1px.png)
-![Dot](Examples/dot.png)
-![Circle w/ Dot](Examples/circle-dot.png)
-![Triad](Examples/triad.png)
+See [Examples](Examples/examples.md).
