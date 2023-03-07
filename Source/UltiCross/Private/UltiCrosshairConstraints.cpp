@@ -86,7 +86,7 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Crosshairs.Thickness");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.5f, 20.0f, 0.5f);
+  CONSTRAINT_DEFAULT(FUltiCrosshairThicknessConstraint, 30.0f);
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Crosshairs.Count");
@@ -106,7 +106,7 @@ FUltiCrosshairConstraints::FUltiCrosshairConstraints()
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Circle.Radius");
-  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 30.0f, 1.0f);
+  CONSTRAINT_DEFAULT(FUltiCrosshairDiscreteConstraint, 0.0f, 50.0f, 1.0f);
   CONSTRAINTS_END();
 
   CONSTRAINTS_START("Ngon.Thickness");
