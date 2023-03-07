@@ -553,11 +553,7 @@ void SUltiCrossConfigDialog::OnDialogResult(TSharedPtr<SCompoundWidget> Widget, 
   {
     Crosshair->SaveCrosshair();
 
-    // Update CDO.
-    //
-    // For configuration options, this seems to already be done
-    // implicity with SaveConfig(). However, since CrosshairName is not marked
-    // as Config, it won't.
+    // Update CDO to for new instantiations of the crosshair
     UUltiCrosshair* CDO = GetMutableDefault<UUltiCrosshair>(Crosshair->GetClass());
     CDO->CopyCrosshairParameters(Crosshair);
 

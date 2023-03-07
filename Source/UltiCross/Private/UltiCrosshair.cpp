@@ -7,19 +7,23 @@ UUltiCrosshair::UUltiCrosshair(class FObjectInitializer const & PCIP) : Super(PC
 {
 }
 
-void UUltiCrosshair::PostLoad()
-{
-  Super::PostLoad();
-
-  LoadCrosshair();
-  InitializeName();
-}
-
 void UUltiCrosshair::PostInitProperties()
 {
   Super::PostInitProperties();
-  Texture = UTexture2D::CreateTransient(192, 192);
-  UpdateTexture();
+
+  if (HasAnyFlags(RF_ClassDefaultObject))
+  {
+    // Load configuration if CDO
+    LoadCrosshair();
+  }
+  else
+  {
+    // Only instances need a texture
+    Texture = UTexture2D::CreateTransient(192, 192);
+    UpdateTexture();
+  }
+
+  InitializeName();
 }
 
 void UUltiCrosshair::InitializeName()

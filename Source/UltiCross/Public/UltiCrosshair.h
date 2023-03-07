@@ -180,7 +180,6 @@ public:
 
   TSharedRef<FUltiCrosshairConstraint> GetConstraint(const FString& PropertyPath);
 
-  virtual void PostLoad() override;
   virtual void PostInitProperties() override;
 
   /** Draw the crosshair using our own implementation. */
